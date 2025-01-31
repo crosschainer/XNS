@@ -41,22 +41,32 @@ a {
     background: none !important;
 }
 
-.form-control {
+#searchInput {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
     transition: background 0.3s, border-color 0.3s;
 }
 
-.form-control:focus {
+#searchInput:focus {
     background: rgba(255, 255, 255, 0.15);
     color: white;
     border-color: rgba(255, 255, 255, 0.3);
     box-shadow: none;
 }
 
-.form-control::placeholder {
+#searchInput::placeholder {
     color: rgba(255, 255, 255, 0.5);
+}
+
+#newOwnerInput {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+  }
+#newOwnerInput:focus {
+background: rgba(255, 255, 255, 0.15);
+border-color: rgba(255, 255, 255, 0.3);
 }
 
 .btn {
@@ -80,6 +90,32 @@ h1 {
 
 .navbar-toggler-icon {
     filter: invert(1) brightness(200%);
+}
+
+.modal .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+.modal-header,
+.modal-footer {
+  border-color: rgba(255, 255, 255, 0.2) !important; /* a faint white line */
+}
+
+/* Match the background style of your site */
+.modal-content {
+    background: rgba(255, 255, 255, 0.1); 
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+  }
+  
+/* Close (X) button inversion */
+.modal-header .btn-close {
+filter: invert(100%);
+}
+
+/* Optionally change the backdrop color from default black */
+.modal-backdrop.show {
+background-color: rgba(30, 30, 47, 0.7); /* or whatever you prefer */
 }
 
 #resultBox {

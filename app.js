@@ -110,6 +110,12 @@ function showResultBox() {
                 if(document.querySelector("#change-address")) {
                     document.querySelector("#change-address").addEventListener("click", () => changeAddress(searchInput));
                 }
+                if (document.querySelector("#transfer-now")) {
+                    document.querySelector("#transfer-now").addEventListener("click", () => {
+                      openTransferOwnershipModal(searchInput);
+                    });
+                  }
+                  
             } else if (owner == "None") {
                 resultBox.innerHTML = `
                 <div class="d-flex flex-column align-items-stretch gap-3">
@@ -170,6 +176,27 @@ function showToast(message, type = "success") {
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
+
+function openTransferOwnershipModal(name) {
+    // Store the current name in a global or local variable
+    window.currentTransferName = name;
+  
+    // Create a modal instance and open it
+    const modalElement = document.getElementById("transferOwnershipModal");
+    const transferOwnershipModal = new bootstrap.Modal(modalElement);
+    transferOwnershipModal.show();
+
+    // Add event listener to the transfer button
+    document.getElementById("confirmTransferButton").addEventListener("click", () => {
+        const newOwnerAddress = document.getElementById("newOwnerInput").value.trim();
+        if (newOwnerAddress === "") {
+            showToast("Please enter a valid address", "error");
+            return;
+        }
+        transferNameToAddress(name, newOwnerAddress);
+    });
+  }
+  
 
 async function execute_get_owner(name) {
     let payload = {
@@ -310,6 +337,33 @@ function changeAddress(name) {
             showToast('Change Address Transaction failed', 'error');
         } else {
             showToast('Change Address Transaction successful', 'success');
+            showResultBox();
+        }
+    });
+}
+
+function transferNameToAddress(name, address) {
+    if(address === "") {
+        showToast("Please connect your wallet first", "error");
+        return;
+    }
+    XianWalletUtils.sendTransaction(
+        contract,
+        "transfer",
+        {
+            "name": name,
+            "to": address
+        }
+    ).then(result => {
+        // Close the modal
+        const modalElement = document.getElementById("transferOwnershipModal");
+        const transferOwnershipModal = bootstrap.Modal.getInstance(modalElement);
+        transferOwnershipModal.hide();
+        
+        if (result.errors) {
+            showToast('Transfer Transaction failed', 'error');
+        } else {
+            showToast('Transfer Transaction successful', 'success');
             showResultBox();
         }
     });
