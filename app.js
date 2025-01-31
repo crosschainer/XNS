@@ -310,7 +310,7 @@ function changeAddress(name) {
 function connectWallet() {
     XianWalletUtils.requestWalletInfo()
     .then(info => {
-        address = info.address;
+        
         if (info.locked) {
             showToast('Please unlock your wallet', 'error');
             return;
@@ -319,6 +319,7 @@ function connectWallet() {
             showToast('Please switch to the testnet network in your wallet', 'error');
             return;
         }
+        address = info.address;
         connectWalletButton.classList.add("d-none");
         addressSpan.textContent = address.slice(0, 6) + "..." + address.slice(-4);
         addressSpan.classList.remove("d-none");
