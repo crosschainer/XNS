@@ -89,7 +89,7 @@ function showResultBox() {
                             <div class="d-flex flex-column gap-1">
                                 <span class="text-muted">Expires in:</span>
                                 <span class="font-weight-bold">${expiryTime} days</span>
-                                ${address === owner ? '<button class="btn btn-success" id="renew-now">Renew Now</button>' : ``}
+                                ${address === owner ? '<button class="btn btn-success" id="renew-now">Add 365 Days</button>' : ``}
                             </div>
                             <div class="d-flex flex-column gap-1">
                                 <span class="text-muted">Connected Address:</span>
