@@ -40,6 +40,9 @@ function showResultBox() {
     resultBox.style.transform = "scale(0.95)";
     resultBox.style.visibility = "hidden"; // Hide it first
 
+    // Replace Search Icon with Spinner to indicate loading
+    document.getElementById("searchButton").innerHTML  = '<div class="spinner-border spinner-border-sm" role="status"></div>';
+
     // Fetch owner and expiry time
     let promises = Promise.all([execute_get_owner(searchInput), execute_get_expiry_time(searchInput), execute_get_main_name_to_address(searchInput)]);
 
@@ -136,7 +139,9 @@ function showResultBox() {
                 resultBox.style.opacity = "1";
                 resultBox.style.transform = "scale(1)";
             });
-
+            
+            // Reset Search Icon
+            document.getElementById("searchButton").innerHTML = '<i class="bi bi-search"></i>';
         }, 100);
     });
 }
