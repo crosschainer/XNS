@@ -84,7 +84,7 @@ function showResultBox() {
                         <div class="d-flex gap-2 justify-content-between flex-sm-column flex-md-row">
                             <div class="d-flex flex-column gap-1">
                                 <span class="text-muted">Owner:</span>
-                                <span class="font-weight-bold"><a href="${EXPLORER}/address/${owner}" target="_blank">${shortenedOwner}</a></span>
+                                <span class="font-weight-bold"><a href="${EXPLORER}/addresses/${owner}" target="_blank">${shortenedOwner}</a></span>
                             </div>
                             <div class="d-flex flex-column gap-1">
                                 <span class="text-muted">Expires in:</span>
@@ -93,7 +93,7 @@ function showResultBox() {
                             </div>
                             <div class="d-flex flex-column gap-1">
                                 <span class="text-muted">Connected Address:</span>
-                                <span class="font-weight-bold"><a href="${EXPLORER}/address/${mainNameToAddress}" target="_blank">${shortenedMainNameToAddress}</a></span>
+                                <span class="font-weight-bold"><a href="${EXPLORER}/addresses/${mainNameToAddress}" target="_blank">${shortenedMainNameToAddress}</a></span>
                                 ${address === owner ? '<button class="btn btn-success" id="change-address">Change to My Address</button>' : ``}
                             </div>
                         </div>
