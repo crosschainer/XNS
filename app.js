@@ -331,6 +331,9 @@ function connectWallet() {
         connectWalletButton.classList.add("d-none");
         addressSpan.textContent = address.slice(0, 6) + "..." + address.slice(-4);
         addressSpan.classList.remove("d-none");
+        if (document.querySelector("#searchInput").value.trim() !== "") {
+            showResultBox();
+        }
     })
     .catch(error => {
         showToast('Xian Wallet Chrome extension not installed or not responding', 'error');
