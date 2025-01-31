@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap Boilerplate</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="custom.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="toastContainer"></div>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="d-flex justify-content-between w-100">
+                <a class="navbar-brand text-white" href="#">XNS</a>
+                <div class="d-flex align-items-center">
+                    <button class="btn" id="connectWallet">Connect</button>
+                    <span class="text-white ms-2 d-none" id="walletAddress"></span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container full-height">
+        <div class="w-100 text-center">
+            <h1>Your Web3 Name</h1>
+            <p class="text-muted">Your identity on Xian. Forget long unreadable addresses—simplify your identity. More to come.</p>
+            <div class="input-group mx-auto">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search for your Web3 name...">
+                <button class="btn btn-primary" type="button" id="searchButton">
+                    <i class="bi bi-search" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div id="resultBox"></div>
+        </div>
+
+        <!-- In coorperation with Xian Wallet and Xian Explorer -->
+        <div class="text-center mt-5">
+            <p class="text-muted">In cooperation with <a href="https://chromewebstore.google.com/detail/xian-wallet/kcimjjhplbcgkcnanijkolfillgfanlc" target="_blank">Xian Wallet</a> and <a href="https://explorer.xian.org" target="_blank">Xian Explorer</a></p>
+        </div>
+    </div>
+    <script src="dapp.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
