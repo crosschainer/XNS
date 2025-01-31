@@ -45,6 +45,9 @@ function showResultBox() {
 
     promises.then(([owner, expiryTime, mainNameToAddress]) => {
         owner = JSON.parse(owner).result;
+        if (owner != "None") {
+            owner = owner.replaceAll("'", "");
+        }
         let shortenedOwner = owner.slice(0, 6) + "..." + owner.slice(-4);
         shortenedOwner = shortenedOwner === "None" ? "Unset" : shortenedOwner.replaceAll("'", "");
         expiryTime = JSON.parse(expiryTime).result;
@@ -86,12 +89,12 @@ function showResultBox() {
                             <div class="d-flex flex-column gap-1">
                                 <span class="text-muted">Expires in:</span>
                                 <span class="font-weight-bold">${expiryTime} days</span>
-                                ${address === owner ? "" : `<button class="btn btn-success" id="renew-now">Renew Now</button>`}
+                                ${address === owner ? '<button class="btn btn-success" id="renew-now">Renew Now</button>' : ``}
                             </div>
                             <div class="d-flex flex-column gap-1">
                                 <span class="text-muted">Connected Address:</span>
                                 <span class="font-weight-bold"><a href="${EXPLORER}/address/${mainNameToAddress}" target="_blank">${shortenedMainNameToAddress}</a></span>
-                                ${address === owner ? "" : `<button class="btn btn-success" id="change-address">Change to My Address</button>`}
+                                ${address === owner ? '<button class="btn btn-success" id="change-address">Change to My Address</button>' : ``}
                             </div>
                         </div>
                     </div>
