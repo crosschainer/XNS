@@ -84,18 +84,19 @@ function showResultBox() {
                             <span class="feature-item">NFT ownership</span>
                         </div>
                     
-                        <div class="d-flex gap-2 justify-content-between flex-sm-column flex-md-row">
+                        <div class="d-flex gap-2 justify-content-between flex-column flex-md-row">
                             <div class="d-flex flex-column gap-1">
                                 <span class="text-muted">Owner:</span>
                                 <span class="font-weight-bold"><a href="${EXPLORER}/addresses/${owner}" target="_blank">${shortenedOwner}</a></span>
+                                ${address === owner ? '<button class="btn btn-success" id="transfer-now">Transfer Ownership</button>' : ``}
                             </div>
                             <div class="d-flex flex-column gap-1">
                                 <span class="text-muted">Expires in:</span>
                                 <span class="font-weight-bold">${expiryTime} days</span>
-                                ${address === owner ? '<button class="btn btn-success" id="renew-now">Add 365 Days</button>' : ``}
+                                ${address === owner ? '<button class="btn btn-success" id="renew-now">Add 365 Days (' + registrationFee + ' XIAN)</button>' : ``}
                             </div>
                             <div class="d-flex flex-column gap-1">
-                                <span class="text-muted">Connected Address:</span>
+                                <span class="text-muted">Address behind name:</span>
                                 <span class="font-weight-bold"><a href="${EXPLORER}/addresses/${mainNameToAddress}" target="_blank">${shortenedMainNameToAddress}</a></span>
                                 ${address === owner ? '<button class="btn btn-success" id="change-address">Change to My Address</button>' : ``}
                             </div>
