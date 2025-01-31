@@ -84,6 +84,10 @@ h1 {
     font-weight: bold;
 }
 
+.flex-1 {
+    flex: 1;
+}
+
 .text-muted {
     color: rgba(255, 255, 255, 0.7) !important;
 }

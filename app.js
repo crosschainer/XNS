@@ -85,17 +85,17 @@ function showResultBox() {
                         </div>
                     
                         <div class="d-flex gap-2 justify-content-between flex-column flex-md-row">
-                            <div class="d-flex flex-column gap-1">
+                            <div class="d-flex flex-column gap-1 flex-1">
                                 <span class="text-muted">Owner:</span>
                                 <span class="font-weight-bold"><a href="${EXPLORER}/addresses/${owner}" target="_blank">${shortenedOwner}</a></span>
                                 ${address === owner ? '<button class="btn btn-success" id="transfer-now">Transfer Ownership</button>' : ``}
                             </div>
-                            <div class="d-flex flex-column gap-1">
+                            <div class="d-flex flex-column gap-1 flex-1">
                                 <span class="text-muted">Expires in:</span>
                                 <span class="font-weight-bold">${expiryTime} days</span>
                                 ${address === owner ? '<button class="btn btn-success" id="renew-now">Add 365 Days (' + registrationFee + ' XIAN)</button>' : ``}
                             </div>
-                            <div class="d-flex flex-column gap-1">
+                            <div class="d-flex flex-column gap-1 flex-1">
                                 <span class="text-muted">Address behind name:</span>
                                 <span class="font-weight-bold"><a href="${EXPLORER}/addresses/${mainNameToAddress}" target="_blank">${shortenedMainNameToAddress}</a></span>
                                 ${address === owner ? '<button class="btn btn-success" id="change-address">Change to My Address</button>' : ``}
@@ -128,7 +128,7 @@ function showResultBox() {
                             <span class="feature-item">XNS Powered Name</span>
                             <span class="feature-item">NFT ownership</span>
                         </div>
-                        <p class="mb-0 text-muted">You can mint this name for 1 XIAN. It expires after 1 year, and needs to be renewed before or it will be available for others to mint.</p>
+                        <p class="mb-0 text-muted">You can mint this name for ${registrationFee} XIAN. It expires after 1 year, and needs to be renewed before or it will be available for others to mint.</p>
                     </div>
                     <div>
                         <button class="btn btn-success" id="mint-name">Mint Name</button>
@@ -359,7 +359,7 @@ function transferNameToAddress(name, address) {
         const modalElement = document.getElementById("transferOwnershipModal");
         const transferOwnershipModal = bootstrap.Modal.getInstance(modalElement);
         transferOwnershipModal.hide();
-        
+
         if (result.errors) {
             showToast('Transfer Transaction failed', 'error');
         } else {
