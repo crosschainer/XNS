@@ -378,9 +378,19 @@ function connectWallet() {
             showToast('Please unlock your wallet', 'error');
             return;
         }
-        if (info.chainId !== chainId) {
-            showToast('Please switch to the testnet network in your wallet', 'error');
-            return;
+        if (info.chainId == "xian-network-2") {
+            chainId = "xian-network-2";
+            RPC = "https://node.xian.org";
+            EXPLORER = "https://explorer.xian.org";
+            contract = "con_name_service";
+            registrationFee = 100;
+        }
+        if (info.chainId == "xian-testnet-12") {
+            chainId = "xian-testnet-12";
+            RPC = "https://testnet.xian.org";
+            EXPLORER = "https://testnet-explorer.xian.org";
+            contract = "con_name_service";
+            registrationFee = 1;
         }
         address = info.address;
         connectWalletButton.classList.add("d-none");
