@@ -1,9 +1,9 @@
 var address = "";
-var chainId = "xian-testnet-12";
-var RPC = "https://testnet.xian.org";
-var EXPLORER = "https://testnet-explorer.xian.org";
-var contract = "con_zyx";
-var registrationFee = 1;
+var chainId = "xian-network-2";
+var RPC = "https://node.xian.org";
+var EXPLORER = "https://explorer.xian.org";
+var contract = "con_name_service";
+var registrationFee = 100;
 const connectWalletButton = document.getElementById("connectWallet");
 const addressSpan = document.getElementById("walletAddress");
 XianWalletUtils.init(RPC);
