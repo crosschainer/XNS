@@ -86,7 +86,7 @@ function showResultBox() {
                     
                         <div class="d-flex gap-2 justify-content-between flex-column flex-md-row">
                             <div class="d-flex flex-column gap-1 flex-1">
-                                <span class="text-muted">Owner:</span>
+                                <span class="text-muted">NFT Owner:</span>
                                 <span class="font-weight-bold"><a href="${EXPLORER}/addresses/${owner}" target="_blank">${shortenedOwner}</a></span>
                                 ${address === owner ? '<button class="btn btn-success" id="transfer-now">Transfer Ownership</button>' : ``}
                             </div>
