@@ -280,3 +280,28 @@ background-color: rgba(30, 30, 47, 0.7); /* or whatever you prefer */
 .btn-link:hover {
     background: rgba(255, 255, 255, 0.1);
 }
+
+.popover {
+    background-color: rgba(0, 0, 0, 0.8) !important; 
+    color: #fff !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  }
+  
+  .popover-header {
+    background-color: rgba(0, 0, 0, 0.9) !important;
+    color: #fff !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+  }
+  
+  .popover-body {
+    color: #fff !important;
+  }
+  
+  .popover .popover-arrow {
+    /* Matches the popover background color for the arrow */
+    border-top-color: rgba(0, 0, 0, 0.8) !important;
+    /* If arrow is on different side, adjust the relevant border color:
+       border-left-color, border-right-color, etc.
+    */
+  }
+  

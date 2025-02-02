@@ -80,7 +80,18 @@ function showResultBox() {
                     </div>
                     <div class="mb-0">
                         <div class="features">
-                            <span class="feature-item">XNS Powered Name</span>
+                            <span class="feature-item">XNS Powered Name <i class="bi bi-question-circle ms-1"
+     data-bs-toggle="popover"
+     data-bs-trigger="hover focus"
+     data-bs-html="true"
+     data-bs-title="What is XNS Powered Name?"
+     data-bs-content="
+       - Can be used as a receiver in the Xian Wallet to solve the issue of accidentally sending to the wrong address.<br />
+       - In the blockchain explorer, the address behind the name will appear as the name.<br />
+       - The address behind the name can be found by their name on the explorer.<br />
+       And more to come...
+     ">
+  </i></span>
                             <span class="feature-item">NFT ownership</span>
                         </div>
                     
@@ -125,7 +136,18 @@ function showResultBox() {
                     </div>
                     <div class="mb-0">
                         <div class="features">
-                            <span class="feature-item">XNS Powered Name</span>
+                            <span class="feature-item">XNS Powered Name <i class="bi bi-question-circle ms-1"
+     data-bs-toggle="popover"
+     data-bs-trigger="hover focus"
+     data-bs-html="true"
+     data-bs-title="What is XNS Powered Name?"
+     data-bs-content="
+       - Can be used as a receiver in the Xian Wallet to solve the issue of accidentally sending to the wrong address.<br />
+       - In the blockchain explorer, the address behind the name will appear as the name.<br />
+       - The address behind the name can be found by their name on the explorer.<br />
+       And more to come...
+     ">
+  </i></span>
                             <span class="feature-item">NFT ownership</span>
                         </div>
                         <p class="mb-0 text-muted">You can mint this name for ${registrationFee} XIAN. It expires after 1 year, and needs to be renewed before or it will be available for others to mint.</p>
@@ -149,6 +171,18 @@ function showResultBox() {
             
             // Reset Search Icon
             document.getElementById("searchButton").innerHTML = '<i class="bi bi-search"></i>';
+
+            const popoverTriggerList = [].slice.call(
+                document.querySelectorAll('[data-bs-toggle="popover"]')
+              );
+            
+              popoverTriggerList.forEach((popoverTriggerEl) => {
+                new bootstrap.Popover(popoverTriggerEl, {
+                  // Optionally, customize your popover options here
+                  placement: 'top', // or 'auto', 'right', etc.
+                  container: 'body', 
+                });
+              });
         }, 100);
     });
 }
