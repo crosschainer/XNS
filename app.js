@@ -99,29 +99,29 @@ function showResultBox() {
                             <div class="d-flex flex-column gap-1 flex-1">
                                 <span class="text-muted">NFT Owner:</span>
                                 <span class="font-weight-bold"><a href="${EXPLORER}/addresses/${owner}" target="_blank">${shortenedOwner}</a></span>
-                                ${address === owner ? '<button class="btn btn-success" id="transfer-now">Transfer Ownership</button>' : ``}
+                                <button class="btn btn-success ${address === owner ? '': 'btn-disabled'}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${address === owner ? '' : 'You are not the owner of this name'}" id="transfer-now">Transfer Ownership</button>
                             </div>
                             <div class="d-flex flex-column gap-1 flex-1">
                                 <span class="text-muted">Expires in:</span>
                                 <span class="font-weight-bold">${expiryTime} days</span>
-                                ${address === owner ? '<button class="btn btn-success" id="renew-now">Add 365 Days (' + registrationFee + ' XIAN)</button>' : ``}
+                                <button class="btn btn-success ${address === owner ? '': 'btn-disabled'}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${address === owner ? '' : 'You are not the owner of this name'}" id="renew-now">Add 365 Days (` + registrationFee + ` XIAN)</button>
                             </div>
                             <div class="d-flex flex-column gap-1 flex-1">
                                 <span class="text-muted">Address behind name:</span>
                                 <span class="font-weight-bold"><a href="${EXPLORER}/addresses/${mainNameToAddress}" target="_blank">${shortenedMainNameToAddress}</a></span>
-                                ${address === owner ? '<button class="btn btn-success" id="change-address">Change to My Address</button>' : ``}
+                                <button class="btn btn-success ${address === owner ? '': 'btn-disabled'}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${address === owner ? '' : 'You are not the owner of this name'}" id="change-address">Change to My Address</button>
                             </div>
                         </div>
                     </div>
                 </div>
                 `;
-                if(document.querySelector("#renew-now")) {
+                if(document.querySelector("#renew-now") && address === owner) {
                     document.querySelector("#renew-now").addEventListener("click", () => renewName(searchInput));
                 }
-                if(document.querySelector("#change-address")) {
+                if(document.querySelector("#change-address") && address === owner) {
                     document.querySelector("#change-address").addEventListener("click", () => changeAddress(searchInput));
                 }
-                if (document.querySelector("#transfer-now")) {
+                if (document.querySelector("#transfer-now") && address === owner) {
                     document.querySelector("#transfer-now").addEventListener("click", () => {
                       openTransferOwnershipModal(searchInput);
                     });
@@ -183,6 +183,14 @@ function showResultBox() {
                   container: 'body', 
                 });
               });
+
+               // Initialize tooltips
+  const tooltipTriggerList = [].slice.call(
+    document.querySelectorAll('[data-bs-toggle="tooltip"]')
+  );
+  tooltipTriggerList.forEach((tooltipTriggerEl) => {
+    new bootstrap.Tooltip(tooltipTriggerEl);
+  });
         }, 100);
     });
 }
@@ -293,7 +301,7 @@ function mintName(name) {
         "approve",            // method/function name
         {                      // kwargs (method arguments)
             "to": contract,
-            "amount": 1
+            "amount": registrationFee
         },
         // If needed you can put a custom stamp amount here as an additional arg like
         // 100
@@ -329,7 +337,7 @@ function renewName(name) {
         "approve",            // method/function name
         {                      // kwargs (method arguments)
             "to": contract,
-            "amount": 1
+            "amount": registrationFee
         },
         // If needed you can put a custom stamp amount here as an additional arg like
         // 100

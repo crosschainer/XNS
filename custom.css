@@ -309,3 +309,9 @@ background-color: rgba(30, 30, 47, 0.7); /* or whatever you prefer */
     height: 32px;       /* adjust to desired size */
     width: auto;
   }
+
+  .btn-disabled {
+    opacity: 0.5;
+    pointer-events: auto; /* We actually keep pointer events so we can show the tooltip */
+    cursor: not-allowed!important;
+  }
