@@ -305,3 +305,7 @@ background-color: rgba(30, 30, 47, 0.7); /* or whatever you prefer */
     */
   }
   
+  .logo {
+    height: 32px;       /* adjust to desired size */
+    width: auto;
+  }
