@@ -447,6 +447,49 @@ function connectWallet() {
     });
 }
 
+const mintStartDate = new Date("2025-02-07T17:00:00Z"); 
+const daysEl = document.getElementById("days");
+const hoursEl = document.getElementById("hours");
+const minutesEl = document.getElementById("minutes");
+const secondsEl = document.getElementById("seconds");
+
+function updateCountdown() {
+  const now = new Date();
+  // Use your chain's block time or an API if you want better accuracy.
+  const diff = mintStartDate - now;
+
+  if (diff <= 0) {
+    // Countdown is over, enable minting
+    daysEl.textContent = "00";
+    hoursEl.textContent = "00";
+    minutesEl.textContent = "00";
+    secondsEl.textContent = "00";
+    // Optionally clear interval
+    clearInterval(countdownInterval);
+    return;
+  }
+
+  // Calculate time left
+  const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const m = Math.floor((diff / (1000 * 60)) % 60);
+  const s = Math.floor((diff / 1000) % 60);
+
+  daysEl.textContent = String(d).padStart(2, "0");
+  hoursEl.textContent = String(h).padStart(2, "0");
+  minutesEl.textContent = String(m).padStart(2, "0");
+  secondsEl.textContent = String(s).padStart(2, "0");
+}
+
+// Update every second
+const countdownInterval = setInterval(updateCountdown, 1000);
+updateCountdown(); // initial call
+
+// If date is before mint start date, show countdown
+if (new Date() < mintStartDate) {
+  document.getElementById("countdownContainer").classList.remove("d-none");
+}
+
 
 document.getElementById("connectWallet").addEventListener("click", connectWallet);
 document.getElementById("searchButton").addEventListener("click", showResultBox);
