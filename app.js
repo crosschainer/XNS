@@ -424,7 +424,7 @@ function connectWallet() {
             chainId = "xian-network-2";
             RPC = "https://node.xian.org";
             EXPLORER = "https://explorer.xian.org";
-            contract = "con_name_service";
+            contract = "con_name_service_main";
             registrationFee = 100;
         }
         if (info.chainId == "xian-testnet-12") {
