@@ -319,13 +319,13 @@ background-color: rgba(30, 30, 47, 0.7); /* or whatever you prefer */
   .countdown-container {
     text-align: center;
     margin-top: 30px;
-    background: rgba(255, 255, 255, 0.1); /* or none if you want */
+    background: rgba(255, 255, 255, 0.1); /* match your dark theme style */
     padding: 20px;
     border-radius: 8px;
-    max-width: 500px; 
+    max-width: 500px;
     margin-left: auto;
     margin-right: auto;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
   }
   
   .countdown-container h2 {
@@ -336,23 +336,29 @@ background-color: rgba(30, 30, 47, 0.7); /* or whatever you prefer */
   
   .countdown-display {
     display: flex;
+    flex-wrap: wrap;      /* Allow wrapping on small screens */
     justify-content: center;
-    gap: 15px;
+    gap: 15px;            /* Space between time units */
+  }
+  
+  /* Each time unit container */
+  .countdown-display > div {
+    text-align: center;
+  }
+  
+  /* Big numbers */
+  .countdown-display span {
+    display: block;
     font-size: 2rem;
+    font-weight: bold;
     color: #fff;
   }
   
-  .countdown-display span {
-    min-width: 45px;
-    text-align: center;
-    font-weight: bold;
-  }
-  
+  /* Labels (Days, Hours, etc.) */
   .countdown-display small {
-    margin-left: -5px; /* bring the label a bit closer to the number */
-    color: rgba(255, 255, 255, 0.7);
+    display: block;
     font-size: 0.75rem;
-    display: inline-block;
-    margin-right: 10px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 5px;
   }
   
