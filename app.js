@@ -296,6 +296,7 @@ function mintName(name) {
         showToast("Please connect your wallet first", "error");
         return;
     }
+    document.querySelector("#mint-name").innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div>';
     XianWalletUtils.sendTransaction(
         "currency",            // contract name
         "approve",            // method/function name
@@ -308,6 +309,7 @@ function mintName(name) {
     ).then(result => {
         if (result.errors) {
             showToast('Approval Transaction failed', 'error');
+            document.querySelector("#mint-name").innerHTML = 'Mint Name';
         } else {
             XianWalletUtils.sendTransaction(
                 contract,
@@ -318,9 +320,11 @@ function mintName(name) {
             ).then(result => {
                 if (result.errors) {
                     showToast('Purchase Transaction failed', 'error');
+                    document.querySelector("#mint-name").innerHTML = 'Mint Name';
                 } else {
                     showToast('Transaction successful', 'success');
                     showResultBox();
+                    document.querySelector("#mint-name").innerHTML = 'Mint Name';
                 }
             });
         }
@@ -332,6 +336,7 @@ function renewName(name) {
         showToast("Please connect your wallet first", "error");
         return;
     }
+    document.querySelector("#renew-now").innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div>';
     XianWalletUtils.sendTransaction(
         "currency",            // contract name
         "approve",            // method/function name
@@ -344,6 +349,7 @@ function renewName(name) {
     ).then(result => {
         if (result.errors) {
             showToast('Approval Transaction failed', 'error');
+            document.querySelector("#renew-now").innerHTML = 'Add 365 Days (' + registrationFee + ' XIAN)';
         } else {
             XianWalletUtils.sendTransaction(
                 contract,
@@ -354,9 +360,11 @@ function renewName(name) {
             ).then(result => {
                 if (result.errors) {
                     showToast('Renewal Transaction failed', 'error');
+                    document.querySelector("#renew-now").innerHTML = 'Add 365 Days (' + registrationFee + ' XIAN)';
                 } else {
                     showToast('Renewal Transaction successful', 'success');
                     showResultBox();
+                    document.querySelector("#renew-now").innerHTML = 'Add 365 Days (' + registrationFee + ' XIAN)';
                 }
             });
         }
@@ -368,6 +376,7 @@ function changeAddress(name) {
         showToast("Please connect your wallet first", "error");
         return;
     }
+    document.querySelector("#change-address").innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div>';
     XianWalletUtils.sendTransaction(
         contract,
         "set_main_name_to_caller",
@@ -377,9 +386,11 @@ function changeAddress(name) {
     ).then(result => {
         if (result.errors) {
             showToast('Change Address Transaction failed', 'error');
+            document.querySelector("#change-address").innerHTML = 'Change to My Address';
         } else {
             showToast('Change Address Transaction successful', 'success');
             showResultBox();
+            document.querySelector("#change-address").innerHTML = 'Change to My Address';
         }
     });
 }
@@ -389,6 +400,7 @@ function transferNameToAddress(name, address) {
         showToast("Please connect your wallet first", "error");
         return;
     }
+    document.querySelector("#confirmTransferButton").innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div>';
     XianWalletUtils.sendTransaction(
         contract,
         "transfer",
@@ -404,15 +416,19 @@ function transferNameToAddress(name, address) {
 
         if (result.errors) {
             showToast('Transfer Transaction failed', 'error');
+            document.querySelector("#confirmTransferButton").innerHTML = 'Transfer';
         } else {
             showToast('Transfer Transaction successful', 'success');
             showResultBox();
+            document.querySelector("#confirmTransferButton").innerHTML = 'Transfer';
         }
     });
 }
 
 
 function connectWallet() {
+    // We show a loading spinner while the wallet is being connected
+    document.querySelector("#connectWallet").innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div>';
     XianWalletUtils.requestWalletInfo()
     .then(info => {
         
@@ -441,9 +457,11 @@ function connectWallet() {
         if (document.querySelector("#searchInput").value.trim() !== "") {
             showResultBox();
         }
+        
     })
     .catch(error => {
         showToast('Xian Wallet Chrome extension not installed or not responding', 'error');
+        document.querySelector("#connectWallet").innerHTML = 'Connect';
     });
 }
 
