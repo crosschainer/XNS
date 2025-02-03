@@ -447,7 +447,7 @@ function connectWallet() {
     });
 }
 
-const mintStartDate = new Date("2025-02-07T17:00:00Z"); 
+const mintStartDate = new Date("2025-02-07T14:00:00Z"); 
 const daysEl = document.getElementById("days");
 const hoursEl = document.getElementById("hours");
 const minutesEl = document.getElementById("minutes");
