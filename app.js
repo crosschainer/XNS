@@ -2,7 +2,7 @@ var address = "";
 var chainId = "xian-network-2";
 var RPC = "https://node.xian.org";
 var EXPLORER = "https://explorer.xian.org";
-var contract = "con_name_service_main";
+var contract = "con_name_service_final";
 var registrationFee = 100;
 const connectWalletButton = document.getElementById("connectWallet");
 const addressSpan = document.getElementById("walletAddress");
@@ -448,7 +448,7 @@ function connectWallet() {
             chainId = "xian-network-2";
             RPC = "https://node.xian.org";
             EXPLORER = "https://explorer.xian.org";
-            contract = "con_name_service_main";
+            contract = "con_name_service_final";
             registrationFee = 100;
         }
         if (info.chainId == "xian-testnet-12") {
