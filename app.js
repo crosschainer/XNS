@@ -328,6 +328,8 @@ function mintName(name) {
                 }
             });
         }
+    }).catch(error => {
+        document.querySelector("#mint-name").innerHTML = 'Mint Name';
     });
 }
 
@@ -368,6 +370,8 @@ function renewName(name) {
                 }
             });
         }
+    }).catch(error => {
+        document.querySelector("#renew-now").innerHTML = 'Add 365 Days (' + registrationFee + ' XIAN)';
     });
 }
 
@@ -392,6 +396,8 @@ function changeAddress(name) {
             showResultBox();
             document.querySelector("#change-address").innerHTML = 'Change to My Address';
         }
+    }).catch(error => {
+        document.querySelector("#change-address").innerHTML = 'Change to My Address';
     });
 }
 
@@ -422,6 +428,8 @@ function transferNameToAddress(name, address) {
             showResultBox();
             document.querySelector("#confirmTransferButton").innerHTML = 'Transfer';
         }
+    }).catch(error => {
+        document.querySelector("#confirmTransferButton").innerHTML = 'Transfer';
     });
 }
 
@@ -463,6 +471,7 @@ function connectWallet() {
         showToast('Xian Wallet Chrome extension not installed or not responding', 'error');
         document.querySelector("#connectWallet").innerHTML = 'Connect';
     });
+    document.querySelector("#connectWallet").innerHTML = 'Connect';
 }
 
 const mintStartDate = new Date("2025-02-07T13:00:00Z"); 
