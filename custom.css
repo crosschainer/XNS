@@ -124,6 +124,33 @@ filter: invert(100%);
 background-color: rgba(30, 30, 47, 0.7); /* or whatever you prefer */
 }
 
+.position-relative {
+    position: relative;
+  }
+  
+  #searchInput {
+    position: relative;
+    z-index: 1; /* ensure we can click/enter text */
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+  }
+  
+  /* The overlay for typed text */
+  .typed-placeholder {
+    position: absolute;
+    top: 50%;
+    left: 10px; /* adjust for your input's padding */
+    transform: translateY(-50%);
+    pointer-events: none; /* so clicks go through to the input */
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 1rem;       /* match input text size */
+    font-family: 'Montserrat', sans-serif; /* match your font */
+    white-space: nowrap;   /* keep typed text on one line */
+  }
+.typed-cursor{
+    display:none;
+}
+
 #resultBox {
     display: flex;
     

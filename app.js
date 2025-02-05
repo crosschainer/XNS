@@ -8,6 +8,21 @@ const connectWalletButton = document.getElementById("connectWallet");
 const addressSpan = document.getElementById("walletAddress");
 const ownedNamesContainer = document.getElementById("ownedNamesContainer");
 const nameCloud = document.getElementById("nameCloud");
+
+const placeholderExamples = [
+    "Search for your Web3 name...",
+    "elon",
+    "microsoft",
+    "facebook",
+    "apple",
+    "google",
+    "tesla",
+    "amazon",
+    "xian",
+    "blockchain",
+    "crypto",
+  ];
+
 XianWalletUtils.init(RPC);
 
 function toHexString(byteArray) {
@@ -587,6 +602,40 @@ function connectWallet() {
     document.querySelector("#connectWallet").innerHTML = 'Connect';
 }
 
+function startTypedPlaceholder() {
+    const searchInput = document.getElementById("searchInput");
+    const typedPlaceholder = document.getElementById("typedPlaceholder");
+  
+    // If user typed or arrived via ?name, skip the typed effect
+    if (searchInput.value.trim()) {
+      typedPlaceholder.style.display = "none";
+      return;
+    }
+  
+    // Otherwise, set up the typing animation
+    const typed = new Typed("#typedPlaceholder", {
+      strings: placeholderExamples,
+      typeSpeed: 30,
+      backSpeed: 30,
+      backDelay: 1200,
+      loop: true,
+      showCursor: true,
+      smartBackspace: true,
+      onComplete: (self) => {
+        // If user starts typing mid-animation, we can hide or stop typed
+        // We'll handle that below in the 'input' event as well
+      }
+    });
+  
+    // If user starts typing, hide the typed placeholder
+    searchInput.addEventListener("input", () => {
+      if (searchInput.value.trim()) {
+        typedPlaceholder.style.display = "none";
+        typed.destroy(); // stops the typed loop
+      }
+    });
+  }
+
 const mintStartDate = new Date("2025-02-07T13:00:00Z"); 
 const daysEl = document.getElementById("days");
 const hoursEl = document.getElementById("hours");
@@ -649,4 +698,8 @@ document.addEventListener("DOMContentLoaded", () => {
       // Immediately show result box for that name
       showResultBox();
     }
+
+    // Start rotating placeholder if there's no name loaded
+    startTypedPlaceholder();
+
   });
