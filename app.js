@@ -35,6 +35,11 @@ function showResultBox() {
         return;
     }
 
+     // Update ?name= in the URL (without reloading the page)
+    const params = new URLSearchParams(window.location.search);
+    params.set("name", searchInput);
+    window.history.replaceState({}, "", `?${params.toString()}`);
+
     const resultBox = document.getElementById("resultBox");
 
     // Temporarily hide the content for a smoother transition
@@ -633,3 +638,15 @@ document.getElementById("searchInput").addEventListener("keypress", function (ev
         showResultBox();
     }
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Check the URL for ?name=someName
+    const params = new URLSearchParams(window.location.search);
+    const nameFromUrl = params.get("name");
+    if (nameFromUrl) {
+      // Populate search input
+      document.getElementById("searchInput").value = nameFromUrl.trim();
+      // Immediately show result box for that name
+      showResultBox();
+    }
+  });
