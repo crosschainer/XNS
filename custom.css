@@ -4,7 +4,6 @@ body {
     animation: gradientBG 8s ease infinite;
     color: white;
     font-family: 'Montserrat', sans-serif;
-    overflow: hidden;
 }
 
 a {
