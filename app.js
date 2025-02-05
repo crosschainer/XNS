@@ -6,6 +6,8 @@ var contract = "con_name_service_final";
 var registrationFee = 100;
 const connectWalletButton = document.getElementById("connectWallet");
 const addressSpan = document.getElementById("walletAddress");
+const ownedNamesContainer = document.getElementById("ownedNamesContainer");
+const nameCloud = document.getElementById("nameCloud");
 XianWalletUtils.init(RPC);
 
 function toHexString(byteArray) {
@@ -324,6 +326,7 @@ function mintName(name) {
                 } else {
                     showToast('Transaction successful', 'success');
                     showResultBox();
+                    showOwnedNames(address);
                     document.querySelector("#mint-name").innerHTML = 'Mint Name';
                 }
             });
@@ -426,6 +429,7 @@ function transferNameToAddress(name, address) {
         } else {
             showToast('Transfer Transaction successful', 'success');
             showResultBox();
+            showOwnedNames(address);
             document.querySelector("#confirmTransferButton").innerHTML = 'Transfer';
         }
     }).catch(error => {
@@ -433,6 +437,109 @@ function transferNameToAddress(name, address) {
     });
 }
 
+async function graphqlFetch(query, variables = {}) {
+    try {
+      const response = await fetch(RPC + "/graphql", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query, variables }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`GraphQL request failed with status ${response.status}`);
+      }
+  
+      const json = await response.json();
+  
+      if (json.errors) {
+        // If GraphQL returned errors, throw the first one or handle accordingly
+        throw new Error(json.errors[0]?.message || "GraphQL Error");
+      }
+  
+      return json.data;
+    } catch (error) {
+      console.error("GraphQL Fetch Error:", error);
+      throw error; // re-throw so the caller can handle it
+    }
+  }
+
+async function showOwnedNames(userAddress) {
+
+    if (ownedNamesContainer.classList.contains("d-none")) {
+        ownedNamesContainer.classList.remove("d-none");
+    }
+
+    nameCloud.innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div>';
+
+    // 1. Call fetchOwnedNames
+    const names = await fetchOwnedNames(userAddress);
+
+    nameCloud.innerHTML = ""; // clear previous
+  
+    // 3. If no names, show a message
+    if (!names || names.length === 0) {
+      nameCloud.innerHTML = `<p class="text-muted">You don't own any names yet.</p>`;
+      return;
+    }
+  
+    // 4. Create pill elements for each name
+    names.forEach((name) => {
+      const pill = document.createElement("span");
+      pill.classList.add("name-pill");
+      pill.textContent = name;
+  
+      // Optional: clicking a name triggers a name detail function
+      pill.addEventListener("click", () => {
+        document.getElementById("searchInput").value = name;
+        showResultBox();
+      });
+      nameCloud.appendChild(pill);
+    });
+  }
+
+  async function fetchOwnedNames(userAddress) {
+    // 1. Create the query with a $prefix variable
+    const query = `
+      query ownedNames($prefix: String!) {
+        allStates(
+          filter: {
+            and: {
+              key: { startsWith: $prefix }
+              value: { equalTo: "1" }
+            }
+          }
+        ) {
+          edges {
+            node {
+              key
+              value
+            }
+          }
+        }
+      }
+    `;
+  
+    // 2. Build the prefix: "con_name_service_final.balances:<userAddress>"
+    const prefix = contract + ".balances:" + userAddress;
+  
+    // 3. Call graphqlFetch
+    const data = await graphqlFetch(query, { prefix });
+  
+    // 4. Extract keys from the result
+    const edges = data.allStates?.edges || [];
+  
+    // 5. Parse out the XNS name from each key
+    const names = edges.map((edge) => {
+      const key = edge.node.key; // e.g. "con_name_service_final.balances:7067...:xnsname"
+      const parts = key.split(":");
+      // parts[0] => "con_name_service_final.balances"
+      // parts[1] => user address
+      // parts[2] => xns name
+      return parts[2];
+    });
+  
+    return names;
+  }
 
 function connectWallet() {
     // We show a loading spinner while the wallet is being connected
@@ -465,6 +572,7 @@ function connectWallet() {
         if (document.querySelector("#searchInput").value.trim() !== "") {
             showResultBox();
         }
+        showOwnedNames(address);
         
     })
     .catch(error => {

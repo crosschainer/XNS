@@ -136,8 +136,8 @@ background-color: rgba(30, 30, 47, 0.7); /* or whatever you prefer */
     padding: 20px;
     border-radius: 8px;
     margin-top: 20px;
-    width: 90%;
-    max-width: 700px;
+    width: 100%;
+    max-width: 768px;
     margin-left: auto;
     margin-right: auto;
     opacity: 0;
@@ -361,5 +361,43 @@ background-color: rgba(30, 30, 47, 0.7); /* or whatever you prefer */
     font-size: 0.75rem;
     color: rgba(255, 255, 255, 0.7);
     margin-top: 5px;
+  }
+  
+  .owned-names-container {
+    margin: 30px auto;
+    max-width: 800px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1); /* semi-transparent panel */
+    border-radius: 8px;
+  }
+  
+  /* Optional if you want a consistent heading style inside the panel */
+  .owned-names-container h3 {
+    color: #fff;
+    margin-bottom: 20px;
+    font-weight: 700; /* Montserrat 700 if you're consistent with the rest of your site */
+  }
+  
+  .name-cloud {
+    display: flex;
+    flex-wrap: wrap;    /* ensures wrapping on small screens */
+    justify-content: center;
+    gap: 10px;          /* spacing between pills */
+  }
+  
+  /* Each name pill */
+  .name-pill {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 16px;
+    transition: background 0.3s ease, color 0.3s ease;
+    cursor: pointer;
+  }
+  
+  /* Hover effect for desktop */
+  .name-pill:hover {
+    background-color: rgba(255, 255, 255, 0.2);
   }
   
