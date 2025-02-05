@@ -8,6 +8,7 @@ const connectWalletButton = document.getElementById("connectWallet");
 const addressSpan = document.getElementById("walletAddress");
 const ownedNamesContainer = document.getElementById("ownedNamesContainer");
 const nameCloud = document.getElementById("nameCloud");
+let typedInstance = null;
 
 const placeholderExamples = [
     "Search for your Web3 name...",
@@ -510,6 +511,8 @@ async function showOwnedNames(userAddress) {
   
       // Optional: clicking a name triggers a name detail function
       pill.addEventListener("click", () => {
+        stopTypedPlaceholder();
+
         document.getElementById("searchInput").value = name;
         showResultBox();
       });
@@ -613,7 +616,7 @@ function startTypedPlaceholder() {
     }
   
     // Otherwise, set up the typing animation
-    const typed = new Typed("#typedPlaceholder", {
+    typedInstance = new Typed("#typedPlaceholder", {
       strings: placeholderExamples,
       typeSpeed: 30,
       backSpeed: 30,
@@ -630,10 +633,19 @@ function startTypedPlaceholder() {
     // If user starts typing, hide the typed placeholder
     searchInput.addEventListener("input", () => {
       if (searchInput.value.trim()) {
-        typedPlaceholder.style.display = "none";
-        typed.destroy(); // stops the typed loop
+        stopTypedPlaceholder();
       }
     });
+  }
+
+  function stopTypedPlaceholder() {
+    const typedPlaceholder = document.getElementById("typedPlaceholder");
+    typedPlaceholder.style.display = "none";
+  
+    if (typedInstance) {
+      typedInstance.destroy();
+      typedInstance = null;
+    }
   }
 
 const mintStartDate = new Date("2025-02-07T13:00:00Z"); 
