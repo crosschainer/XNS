@@ -14,7 +14,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link href="custom.css?v=5" rel="stylesheet">
+    <link href="custom.css?v=6" rel="stylesheet">
 </head>
 
 <body>
@@ -97,13 +97,18 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+            <div class="alert alert-danger" role="alert" id="sendError" style="display: none;"></div>
             <label for="newOwnerInput" class="form-label">New Owner Address</label>
             <input
                 type="text"
                 class="form-control"
                 id="newOwnerInput"
-                placeholder="Enter the new owner's wallet address"
+                placeholder="Enter the new owner's wallet address or XNS name"
             />
+            <div class="xns-found" style="display: none;">
+                <span class="xns-found-text">XNS Found <i class="bi bi-check-circle-fill"></i></span>
+                <span class="d-none xns-found-address" id="xnsFoundAddress"></span>
+            </div>
             </div>
             <div class="modal-footer">
             <button
@@ -128,7 +133,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
     <script src="dapp.js"></script>
-    <script src="app.js?v=6"></script>
+    <script src="app.js?v=7"></script>
 </body>
 
 </html>

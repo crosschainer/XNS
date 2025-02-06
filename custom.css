@@ -211,6 +211,14 @@ background-color: rgba(30, 30, 47, 0.7); /* or whatever you prefer */
     color: white;
 }
 
+.alert-danger {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 16px;
+}
+
 .features {
     display: flex;
     gap: 12px;

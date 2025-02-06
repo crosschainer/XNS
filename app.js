@@ -8,6 +8,7 @@ const connectWalletButton = document.getElementById("connectWallet");
 const addressSpan = document.getElementById("walletAddress");
 const ownedNamesContainer = document.getElementById("ownedNamesContainer");
 const nameCloud = document.getElementById("nameCloud");
+const sendError = document.getElementById("sendError");
 let typedInstance = null;
 
 const placeholderExamples = [
@@ -254,10 +255,7 @@ function openTransferOwnershipModal(name) {
     // Add event listener to the transfer button
     document.getElementById("confirmTransferButton").addEventListener("click", () => {
         const newOwnerAddress = document.getElementById("newOwnerInput").value.trim();
-        if (newOwnerAddress === "") {
-            showToast("Please enter a valid address", "error");
-            return;
-        }
+        
         transferNameToAddress(name, newOwnerAddress);
     });
   }
@@ -425,18 +423,32 @@ function changeAddress(name) {
     });
 }
 
-function transferNameToAddress(name, address) {
-    if(address === "") {
-        showToast("Please connect your wallet first", "error");
+function transferNameToAddress(name, recipient) {
+    sendError.style.display = 'none';
+    if (recipient === "") {
+        sendError.innerHTML = 'Recipient address is required!';
+        sendError.style.display = 'block';
         return;
     }
+
+    let xnsFoundAddress = document.getElementById('xnsFoundAddress');
+    if (xnsFoundAddress.innerHTML !== '') {
+        recipient = xnsFoundAddress.innerHTML.replaceAll("'", "");
+    }
+
+    if (recipient.length !== 64) {
+        sendError.innerHTML = 'Invalid recipient address!';
+        sendError.style.display = 'block';
+        return;
+    }
+
     document.querySelector("#confirmTransferButton").innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div>';
     XianWalletUtils.sendTransaction(
         contract,
         "transfer",
         {
             "name": name,
-            "to": address
+            "to": recipient
         }
     ).then(result => {
         // Close the modal
@@ -648,6 +660,27 @@ function startTypedPlaceholder() {
     }
   }
 
+  async function getXNSAddress(){
+    let name = document.getElementById('newOwnerInput').value;
+    let xns_found = document.querySelector('.xns-found');
+    document.getElementById('xnsFoundAddress').innerHTML = '';
+    xns_found.style.display = 'none';
+    if (name === '') return;
+    if (name.length < 3) return;
+    if (name.length > 32) return;
+    if (!/^[a-zA-Z0-9]+$/.test(name)) {
+        return;
+    }
+    let address = await execute_get_main_name_to_address(name);
+    address = JSON.parse(address).result;
+    if (address === "None") {
+        return;
+    }
+    xns_found.style.display = 'block';
+    document.getElementById('xnsFoundAddress').innerHTML = address;
+
+}
+
 const mintStartDate = new Date("2025-02-07T13:00:00Z"); 
 const daysEl = document.getElementById("days");
 const hoursEl = document.getElementById("hours");
@@ -699,6 +732,7 @@ document.getElementById("searchInput").addEventListener("keypress", function (ev
         showResultBox();
     }
 });
+document.getElementById('newOwnerInput').addEventListener('input', getXNSAddress);
 
 document.addEventListener("DOMContentLoaded", () => {
     // Check the URL for ?name=someName
