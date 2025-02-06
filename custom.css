@@ -157,7 +157,7 @@ background-color: rgba(30, 30, 47, 0.7); /* or whatever you prefer */
     flex-direction: column;
     /* Ensures elements stack vertically */
     text-align: center;
-    visibility: hidden;
+    visibility: show;
     background: rgba(255, 255, 255, 0.1);
     padding: 20px;
     border-radius: 8px;
@@ -166,7 +166,7 @@ background-color: rgba(30, 30, 47, 0.7); /* or whatever you prefer */
     max-width: 768px;
     margin-left: auto;
     margin-right: auto;
-    opacity: 0;
+    opacity: 1;
     transform: scale(0.95);
     transition: opacity 0.3s ease, transform 0.3s ease;
     min-height: 150px;
