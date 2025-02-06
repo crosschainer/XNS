@@ -434,4 +434,8 @@ background-color: rgba(30, 30, 47, 0.7); /* or whatever you prefer */
   .name-pill:hover {
     background-color: rgba(255, 255, 255, 0.2);
   }
-  
+
+  /* Need padding for navbar on lower heights because text is too close to the top */
+.navbar{
+  padding-bottom: 3rem;
+}
