@@ -53,6 +53,8 @@ function showResultBox() {
         return;
     }
 
+    searchInput = searchInput.toLowerCase();
+
      // Update ?name= in the URL (without reloading the page)
     const params = new URLSearchParams(window.location.search);
     params.set("name", searchInput);
