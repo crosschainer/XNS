@@ -39,7 +39,7 @@ function fromHexString(hexString) {
 }
 
 function showResultBox() {
-    const searchInput = document.getElementById("searchInput").value.trim();
+    let searchInput = document.getElementById("searchInput").value.trim();
     if (searchInput === "") return;
 
     // Input needs to be ASCII, ALNUM
