@@ -10,6 +10,7 @@ const ownedNamesContainer = document.getElementById("ownedNamesContainer");
 const nameCloud = document.getElementById("nameCloud");
 const sendError = document.getElementById("sendError");
 let typedInstance = null;
+let mainName = null;
 
 const placeholderExamples = [
     "Search for your Web3 name...",
@@ -295,6 +296,23 @@ async function execute_get_expiry_time(name) {
       return decoded;
 }
 
+async function get_current_main_name() {
+    let payload = {
+          "sender": "",
+          "contract": contract,
+          "function": "get_address_to_main_name",
+          "kwargs": {
+              "address": address
+          }
+      };
+      let bytes = new TextEncoder().encode(JSON.stringify(payload));
+      let hex = toHexString(bytes);
+      let response = await fetch(RPC + '/abci_query?path="/simulate_tx/' + hex + '"');
+      let data = await response.json();
+      let decoded = atob(data.result.response.value);
+      return decoded;
+}
+
 async function execute_get_main_name_to_address(name) {
     let payload = {
             "sender": "",
@@ -497,6 +515,8 @@ async function graphqlFetch(query, variables = {}) {
   }
 
 async function showOwnedNames(userAddress) {
+    mainName = await get_current_main_name();
+    mainName = JSON.parse(mainName).result.replaceAll("'", "");
 
     if (ownedNamesContainer.classList.contains("d-none")) {
         ownedNamesContainer.classList.remove("d-none");
@@ -519,6 +539,9 @@ async function showOwnedNames(userAddress) {
     names.forEach((name) => {
       const pill = document.createElement("span");
       pill.classList.add("name-pill");
+      if (name === mainName) {
+        pill.classList.add("main-name");
+      }
       pill.textContent = name;
   
       // Optional: clicking a name triggers a name detail function

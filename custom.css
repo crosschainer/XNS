@@ -434,3 +434,15 @@ background-color: rgba(30, 30, 47, 0.7); /* or whatever you prefer */
   }
 
  
+  .main-name {
+    background-color: #ff4081; /* Pink background or your highlight color */
+  color: #fff;
+  border-color: #ff4081;
+  box-shadow: 0 0 6px rgba(255, 64, 129, 0.5);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+  }
+  /* On hover, if you want a slightly different effect */
+.main-name.highlighted:hover {
+  background-color: #e33770;
+  box-shadow: 0 0 8px rgba(227, 55, 112, 0.7);
+}
