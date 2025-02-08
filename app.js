@@ -137,9 +137,10 @@ function showResultBox() {
                                 <span class="text-muted">Address behind name:</span>
                                 <span class="font-weight-bold"><a href="${EXPLORER}/addresses/${mainNameToAddress}" target="_blank">${shortenedMainNameToAddress}</a></span>
                                 <button class="btn btn-success ${address === owner ? '': 'btn-disabled'}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${address === owner ? '' : 'You are not the owner of this name'}" id="change-address">Change to My Address</button>
-                                ${mainNameToAddress != 'None' ? '<a href="https://'+searchInput.toLowerCase()+'.xns.domains" style=" text-overflow: ellipsis; overflow: hidden; width: 14rem; text-decoration: underline;" target="_blank">' + searchInput.toLowerCase() + '.xns.domains</a>' : ''}
+                               
                             </div>
                         </div>
+                         ${mainNameToAddress != 'None' ? '<a href="https://'+searchInput.toLowerCase()+'.xns.domains" style=" text-overflow: ellipsis; overflow: hidden; margin-top:20px; display:inline-block; text-decoration: underline;" target="_blank">' + searchInput.toLowerCase() + '.xns.domains</a> <i class="bi bi-question-circle ms-1" style=" display: inline-block; vertical-align: super; " data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-html="true" data-bs-title="What is this URL?" data-bs-content="This URL provides a direct link to the explorer page of the address behind the name."> </i>' : ''}
                     </div>
                 </div>
                 `;
