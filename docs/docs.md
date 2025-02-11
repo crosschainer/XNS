@@ -19,7 +19,7 @@ The key functions available are:
   The functions process and format the raw state into a consistent dictionary (or string) that’s easier to work with.
 
 - **Additional Metadata:**  
-  Names can store extra data (such as owner, expiry date, custom fields, etc.). The `get_data` function returns this metadata in a structured format.
+  Names can store extra custom fields. The `get_data` function returns this metadata in a structured format.
 
 ---
 
@@ -150,7 +150,7 @@ Retrieves all metadata stored with a specific name.
 
 - **Error Handling:**  
   If any function returns `"None"`, ensure your dApp handles it gracefully (e.g., by prompting the user to mint a name or displaying a placeholder).
-  
+
 - **Data Parsing:**  
   The `get_data` function returns a dictionary containing custom metadata. Your dApp can use these fields to provide richer user experiences.
 
