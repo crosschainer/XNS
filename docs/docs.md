@@ -2,7 +2,7 @@
 
 XNS is a decentralized naming system that replaces long, unreadable addresses with short, memorable names. Each name is minted as an NFT and can store additional metadata. To simplify integration, external dApps should use the provided helper functions instead of reading the raw on-chain state. This ensures that expiry logic and data normalization are properly handled. Please use the TX simulator API to run these read-only functions off-chain.
 
-The key functions available are:
+The key read functions available are (Run these functions using the TX simulator API, off-chain!):
 
 1. **`get_data`** – Retrieves metadata stored with a given name.
 2. **`get_address_to_main_name`** – Given a wallet address, returns the main name associated with that address (or `"None"` if none is set).
