@@ -492,6 +492,53 @@ function transferNameToAddress(name, recipient) {
     });
 }
 
+async function check_expiry_of_names(names) {
+    if (names.length === 0) return [];
+
+    // Construct the GraphQL query dynamically
+    let conditions = names.map(name => `{ key: { equalTo: "${contract}.expiry_times:${name}" } }`).join(", ");
+    
+    const query = `
+        query expiryDates {
+            allStates(
+                filter: { or: [ ${conditions} ] }
+            ) {
+                edges {
+                    node {
+                        key
+                        value
+                    }
+                }
+            }
+        }
+    `;
+
+    try {
+        const data = await graphqlFetch(query);
+        const edges = data.allStates?.edges || [];
+
+        let validNames = [];
+        const now = new Date();
+
+        edges.forEach(edge => {
+            const keyParts = edge.node.key.split(":");
+            const name = keyParts[1]; // Extract the name from "con_name_service_final.expiry_times:<name>"
+            const expiryTime = new Date(edge.node.value);
+
+            if (expiryTime > now) {
+                console.log("Name", name, "expires on", expiryTime, "now is", now, "so it's valid");
+                validNames.push(name); // Only keep non-expired names
+            }
+        });
+
+        return validNames;
+    } catch (error) {
+        console.error("Error fetching expiry dates:", error);
+        return [];
+    }
+}
+
+
 async function graphqlFetch(query, variables = {}) {
     try {
       const response = await fetch(RPC + "/graphql", {
@@ -529,7 +576,10 @@ async function showOwnedNames(userAddress) {
     nameCloud.innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div>';
 
     // 1. Call fetchOwnedNames
-    const names = await fetchOwnedNames(userAddress);
+    let names = await fetchOwnedNames(userAddress);
+
+    // 2. Check expiry of list of names and remove expired names
+    names = await check_expiry_of_names(names);
 
     nameCloud.innerHTML = ""; // clear previous
   
