@@ -11,6 +11,7 @@ const nameCloud = document.getElementById("nameCloud");
 const sendError = document.getElementById("sendError");
 let typedInstance = null;
 let mainName = null;
+let records = [];
 
 const placeholderExamples = [
     "Search for your Web3 name...",
@@ -141,6 +142,24 @@ function showResultBox() {
                             </div>
                         </div>
                          ${mainNameToAddress != 'None' ? '<a href="https://'+searchInput.toLowerCase()+'.xns.domains" style=" word-wrap: break-word; overflow: hidden; margin-top:20px; display:inline-block; text-decoration: underline;width:100%;" target="_blank">' + searchInput.toLowerCase() + '.xns.domains</a> <i class="bi bi-question-circle ms-1" style=" display: inline-block; vertical-align: super; " data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-html="true" data-bs-title="What is this URL?" data-bs-content="This URL provides a direct link to the explorer page of the address behind the name."> </i>' : ''}
+                         <div id="recordsSection" class="records-section mt-2">
+                         <h5 class="text-white" style="
+                                text-align: left;
+                            ">Stored Data</h5>
+                         <div class="border-radius-8">
+                         <table class="table table-dark table-striped custom-table">
+                           <thead>
+                             <tr>
+                               <th scope="col">Key</th>
+                               <th scope="col">Value</th>
+                             </tr>
+                           </thead>
+                           <tbody id="recordsTableBody">
+                             <!-- Record rows will be dynamically injected here -->
+                           </tbody>
+                         </table>
+                         </div>
+                       </div>
                     </div>
                 </div>
                 `;
@@ -155,6 +174,10 @@ function showResultBox() {
                       openTransferOwnershipModal(searchInput);
                     });
                   }
+
+                // Load on-chain records for this name.
+                loadOnChainRecords();
+                
                   
             } else if (owner == "None") {
                 resultBox.innerHTML = `
@@ -757,6 +780,69 @@ function startTypedPlaceholder() {
     document.getElementById('xnsFoundAddress').innerHTML = address;
 
 }
+
+// Renders the records table.
+function renderRecords(records) {
+    const tableBody = document.getElementById('recordsTableBody');
+    tableBody.innerHTML = '';
+    Object.entries(records).forEach(([key, value], index) => {  
+      const row = document.createElement('tr');
+      if (value.editMode) {
+        // Render inline editing form for this record.
+        row.innerHTML = `
+          <td>
+            <input type="text" class="form-control form-control-sm" value="${key}" data-index="${index}" data-field="key">
+          </td>
+          <td>
+            <input type="text" class="form-control form-control-sm" value="${value}" data-index="${index}" data-field="value">
+          </td>
+          
+        `;
+      } else {
+        row.innerHTML = `
+          <td>${key}</td>
+          <td>${value}</td>
+          
+        `;
+      }
+      tableBody.appendChild(row);
+    });
+    if (Object.keys(records).length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = '<td colspan="2" class="text-center">No records found</td>';
+        tableBody.appendChild(row);
+    }
+  }
+  
+  // Example: Load on-chain records using get_data.
+  // get_data returns an escaped dictionary, so we decode it with atob() and parse the JSON.
+  async function loadOnChainRecords() {
+    try {
+        let payload = {
+            "sender": "",
+            "contract": contract,
+            "function": "get_data",
+            "kwargs": {
+                "name": document.getElementById("searchInput").value.trim()
+            }
+        };
+        let bytes = new TextEncoder().encode(JSON.stringify(payload));
+        let hex = toHexString(bytes);
+        let response = await fetch(RPC + '/abci_query?path="/simulate_tx/' + hex + '"');
+        let data = await response.json();
+        let decoded = atob(data.result.response.value);
+        decoded = JSON.parse(decoded);
+        let onChainRecords = decoded["result"];
+        // Fix encoded dict to make it JSON-parseable
+        onChainRecords = onChainRecords.replaceAll("'", '"');
+        onChainRecords = JSON.parse(onChainRecords);
+        records = onChainRecords || [];
+        renderRecords(records);
+    } catch (error) {
+      console.error("Error loading on-chain records:", error);
+    }
+  }
+  
 
 const mintStartDate = new Date("2025-02-07T13:00:00Z"); 
 const daysEl = document.getElementById("days");

@@ -446,3 +446,74 @@ background-color: rgba(30, 30, 47, 0.7); /* or whatever you prefer */
   background-color: #e33770;
   box-shadow: 0 0 8px rgba(227, 55, 112, 0.7);
 }
+.records-section h4 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+.records-section p {
+  margin-bottom: 1rem;
+}
+
+/* Custom Table Styling */
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 auto;
+  background: transparent;
+}
+
+.custom-table th,
+.custom-table td {
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  text-align: left;
+}
+
+.custom-table thead {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+.custom-table tbody {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.custom-table thead th {
+  font-weight: 600;
+  color: #fff;
+  border:none;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.custom-table tbody tr:nth-child(odd) {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.custom-table tbody tr:nth-child(even) {
+  background-color: transparent;
+}
+
+.custom-table tbody td {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Optional: style buttons inside table cells */
+.custom-table tbody td button {
+  font-size: 0.8rem;
+  padding: 0.3rem 0.6rem;
+}
+.border-radius-8 {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.custom-table td:first-child {
+  border-left:none;
+}
+.custom-table td:nth-child(2) {
+  border-right:none;
+}
+.custom-table tr:last-child td {
+  border-bottom:none;
+}
