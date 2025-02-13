@@ -7,6 +7,7 @@ The key read functions available are (Run these functions using the TX simulator
 1. **`get_data`** – Retrieves metadata stored with a given name.
 2. **`get_address_to_main_name`** – Given a wallet address, returns the main name associated with that address (or `"None"` if none is set).
 3. **`get_main_name_to_address`** – Given a main name, returns the associated wallet address (or `"None"` if no address is set).
+4. **`get_owner`** – Given a name, returns the wallet address that owns it.
 
 ---
 
@@ -143,6 +144,47 @@ Retrieves all metadata stored with a specific name.
 ```
 
 ---
+### 4. `get_owner`
+
+**Purpose:**  
+Returns the wallet address that owns a given name.
+
+**Parameters:**  
+- `name` (string): The name whose owner you want to look up.
+
+**Returns:**  
+- The wallet address (string) that owns the name, or `"None"` if the name does not exist.
+
+**Example Request Payload:**
+
+```json
+{
+  "sender": "",
+  "contract": "con_name_service_final",
+  "function": "get_owner",
+  "kwargs": {
+    "name": "exampleName"
+  }
+}
+```
+
+**Example Response:**
+
+```json
+{
+  "result": "0x123...abc"
+}
+```
+
+*or*
+
+```json
+{
+  "result": "None"
+}
+```
+
+---
 
 ## Integration Tips
 
@@ -158,4 +200,4 @@ Retrieves all metadata stored with a specific name.
 
 ## Conclusion
 
-By integrating with XNS through the helper functions `get_data`, `get_address_to_main_name`, and `get_main_name_to_address`, external dApps can reliably resolve names and associated metadata while abstracting away the complexity of raw state handling and expiry checks. This streamlined approach ensures that you always work with accurate, up-to-date data.
+By integrating with XNS through the helper functions `get_data`, `get_address_to_main_name`, `get_main_name_to_address` and `get_owner`, external dApps can reliably resolve names and associated metadata while abstracting away the complexity of raw state handling and expiry checks. This streamlined approach ensures that you always work with accurate, up-to-date data.
