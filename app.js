@@ -153,10 +153,10 @@ function showResultBox() {
                             ">Stored Data</h5>
                             <div id="recordsActions" class="mb-2">
     <!-- We will show/hide these programmatically depending on ownership and edit mode -->
-    <button id="editRecordsBtn" class="btn btn-sm btn-outline-light me-2 d-none">Edit Data</button>
-    <button id="addRecordBtn" class="btn btn-sm btn-outline-light me-2 d-none">Add Record</button>
-    <button id="saveRecordsBtn" class="btn btn-sm btn-success me-2 d-none">Save</button>
-    <button id="cancelEditBtn" class="btn btn-sm btn-secondary d-none">Cancel</button>
+    <button id="editRecordsBtn" class="btn btn-success me-2 d-none">Edit Data</button>
+    <button id="addRecordBtn" class="btn btn-success me-2 d-none">Add Record</button>
+    <button id="saveRecordsBtn" class="btn btn-success me-2 d-none">Save</button>
+    <button id="cancelEditBtn" class="btn btn-success d-none">Cancel</button>
   </div>
                          <div class="border-radius-8">
                          <table class="table table-dark table-striped custom-table">
