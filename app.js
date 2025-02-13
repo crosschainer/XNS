@@ -12,6 +12,9 @@ const sendError = document.getElementById("sendError");
 let typedInstance = null;
 let mainName = null;
 let records = [];
+let isNameOwner = false;           // <--- ADDED
+let currentSearchedName = "";      // <--- ADDED, store last search
+let recordsInEditMode = false;     // <--- ADDED, track if we are editing
 
 const placeholderExamples = [
     "Search for your Web3 name...",
@@ -55,6 +58,7 @@ function showResultBox() {
     }
 
     searchInput = searchInput.toLowerCase();
+    currentSearchedName = searchInput; // <--- ADDED
 
      // Update ?name= in the URL (without reloading the page)
     const params = new URLSearchParams(window.location.search);
@@ -100,6 +104,7 @@ function showResultBox() {
 
         setTimeout(() => {
             if (owner !== "None") {
+              isNameOwner = (address === owner); // <--- ADDED
                 resultBox.innerHTML = `
                 <div class="d-flex flex-column align-items-stretch gap-3">
                     <div class="d-flex align-items-start gap-2">
@@ -146,12 +151,21 @@ function showResultBox() {
                          <h5 class="text-white" style="
                                 text-align: left;
                             ">Stored Data</h5>
+                            <div id="recordsActions" class="mb-2">
+    <!-- We will show/hide these programmatically depending on ownership and edit mode -->
+    <button id="editRecordsBtn" class="btn btn-sm btn-outline-light me-2 d-none">Edit Data</button>
+    <button id="addRecordBtn" class="btn btn-sm btn-outline-light me-2 d-none">Add Record</button>
+    <button id="saveRecordsBtn" class="btn btn-sm btn-success me-2 d-none">Save</button>
+    <button id="cancelEditBtn" class="btn btn-sm btn-secondary d-none">Cancel</button>
+  </div>
                          <div class="border-radius-8">
                          <table class="table table-dark table-striped custom-table">
                            <thead>
                              <tr>
                                <th scope="col">Key</th>
                                <th scope="col">Value</th>
+
+                               ${address === owner ? '<th scope="col">Actions</th>' : ''}
                              </tr>
                            </thead>
                            <tbody id="recordsTableBody">
@@ -180,6 +194,7 @@ function showResultBox() {
                 
                   
             } else if (owner == "None") {
+              isNameOwner = false; // <--- ADDED
                 resultBox.innerHTML = `
                 <div class="d-flex flex-column align-items-stretch gap-3">
                     <div class="d-flex align-items-start gap-2">
@@ -813,34 +828,212 @@ function renderRecords(records) {
         tableBody.appendChild(row);
     }
   }
+  function renderRecords(recordsObj) {
+    // recordsObj is an object: { key1: val1, key2: val2, ... }
   
-  // Example: Load on-chain records using get_data.
-  // get_data returns an escaped dictionary, so we decode it with atob() and parse the JSON.
+    const tableBody = document.getElementById('recordsTableBody');
+    if (!tableBody) return; // in case we're on the "available" view
+  
+    tableBody.innerHTML = '';
+  
+    // Keys sorted or unsorted? You decide
+    const keys = Object.keys(recordsObj);
+  
+    if (keys.length === 0) {
+      const row = document.createElement('tr');
+      row.innerHTML = '<td colspan="3" class="text-center">No records found</td>';
+      tableBody.appendChild(row);
+      return;
+    }
+  
+    keys.forEach((key) => {
+      const value = recordsObj[key];
+      
+      const row = document.createElement('tr');
+  
+      if (recordsInEditMode && isNameOwner) {
+        // Render input fields
+        row.innerHTML = `
+          <td>
+            <input type="text" class="form-control form-control-sm record-key" value="${key}">
+          </td>
+          <td>
+            <input type="text" class="form-control form-control-sm record-value" value="${value}">
+          </td>
+          <td>
+            <button class="btn btn-sm btn-outline-danger delete-record-btn">Delete</button>
+          </td>
+        `;
+      } else {
+        // Just show read-only
+        row.innerHTML = `
+          <td>${key}</td>
+          <td>${value}</td>
+          ${isNameOwner ? '<td style="width: 100px;"></td>' : ''}
+        `;
+      }
+  
+      // If in edit mode, set up delete button
+      if (recordsInEditMode && isNameOwner) {
+        const deleteBtn = row.querySelector('.delete-record-btn');
+        deleteBtn.addEventListener('click', () => {
+          // Remove from records object
+          delete recordsObj[key];
+          renderRecords(recordsObj);
+        });
+      }
+  
+      tableBody.appendChild(row);
+    });
+  }
+  
+  // We use this after we fetch on-chain data
   async function loadOnChainRecords() {
     try {
-        let payload = {
-            "sender": "",
-            "contract": contract,
-            "function": "get_data",
-            "kwargs": {
-                "name": document.getElementById("searchInput").value.trim()
-            }
-        };
-        let bytes = new TextEncoder().encode(JSON.stringify(payload));
-        let hex = toHexString(bytes);
-        let response = await fetch(RPC + '/abci_query?path="/simulate_tx/' + hex + '"');
-        let data = await response.json();
-        let decoded = atob(data.result.response.value);
-        decoded = JSON.parse(decoded);
-        let onChainRecords = decoded["result"];
-        // Fix encoded dict to make it JSON-parseable
-        onChainRecords = onChainRecords.replaceAll("'", '"');
-        onChainRecords = JSON.parse(onChainRecords);
-        records = onChainRecords || [];
-        renderRecords(records);
+      const nameToLoad = document.getElementById("searchInput").value.trim();
+      if (!nameToLoad) return;
+  
+      let payload = {
+        "sender": "",
+        "contract": contract,
+        "function": "get_data",
+        "kwargs": {
+          "name": nameToLoad
+        }
+      };
+  
+      let bytes = new TextEncoder().encode(JSON.stringify(payload));
+      let hex = toHexString(bytes);
+      let response = await fetch(RPC + '/abci_query?path="/simulate_tx/' + hex + '"');
+      let data = await response.json();
+      let decoded = atob(data.result.response.value);
+      decoded = JSON.parse(decoded);
+      
+      let onChainRecords = decoded["result"];      // This is the string from the contract
+      onChainRecords = onChainRecords.replaceAll("'", '"'); 
+      onChainRecords = JSON.parse(onChainRecords); // Convert to object
+  
+      // `records` is a global
+      records = onChainRecords || {};
+  
+      // Now that we have the records, show them
+      renderRecords(records);
+  
+      // Show/hide the "Edit/Add/Save/Cancel" buttons if user is the owner
+      const editBtn = document.getElementById('editRecordsBtn');
+      const addBtn = document.getElementById('addRecordBtn');
+      const saveBtn = document.getElementById('saveRecordsBtn');
+      const cancelBtn = document.getElementById('cancelEditBtn');
+  
+      if (editBtn) {
+        if (isNameOwner) {
+          editBtn.classList.remove('d-none');
+        } else {
+          editBtn.classList.add('d-none');
+        }
+        // Hide save/cancel by default
+        saveBtn.classList.add('d-none');
+        cancelBtn.classList.add('d-none');
+  
+        // Setup event listeners only once
+        editBtn.onclick = () => toggleRecordsEdit(true);
+        cancelBtn.onclick = () => {
+          showResultBox();
+          toggleRecordsEdit(false);
+        }
+        saveBtn.onclick = saveEditedRecords;
+        addBtn.onclick = addNewRecordRow;
+      }
     } catch (error) {
       console.error("Error loading on-chain records:", error);
     }
+  }
+  
+  // Toggles the entire table into/out-of edit mode
+  function toggleRecordsEdit(enableEdit) {
+    recordsInEditMode = enableEdit;
+  
+    const editBtn = document.getElementById('editRecordsBtn');
+    const addBtn = document.getElementById('addRecordBtn');
+    const saveBtn = document.getElementById('saveRecordsBtn');
+    const cancelBtn = document.getElementById('cancelEditBtn');
+  
+    if (enableEdit) {
+      editBtn.classList.add('d-none');
+      addBtn.classList.remove('d-none');
+      saveBtn.classList.remove('d-none');
+      cancelBtn.classList.remove('d-none');
+    } else {
+      editBtn.classList.remove('d-none');
+      addBtn.classList.add('d-none');
+      saveBtn.classList.add('d-none');
+      cancelBtn.classList.add('d-none');
+    }
+  
+    // Re-render
+    renderRecords(records);
+  }
+  
+  // Adds a blank row to the records so user can define a new key-value
+  function addNewRecordRow() {
+    // We'll add a dummy key with a random name to avoid collisions
+    let newKey = `new_key_${Math.floor(Math.random() * 9999)}`;
+    records[newKey] = "new_value";
+    renderRecords(records);
+  }
+  
+  // When the user clicks "Save," gather all rows from the table, 
+  // build the updated records object, and send it with setData.
+  function saveEditedRecords() {
+    // Rebuild `records` from the table rows:
+    const tableBody = document.getElementById('recordsTableBody');
+    const rows = tableBody.querySelectorAll('tr');
+  
+    // We'll build a new object, then swap out the global `records`.
+    let newRecords = {};
+  
+    rows.forEach(row => {
+      const keyInput = row.querySelector('.record-key');
+      const valueInput = row.querySelector('.record-value');
+  
+      if (keyInput && valueInput) {
+        let k = keyInput.value.trim();
+        let v = valueInput.value.trim();
+        if (k) {
+          newRecords[k] = v;
+        }
+      }
+    });
+  
+    // Now call setData on the contract
+    setData(currentSearchedName, newRecords);
+  }
+  
+  // The existing setData function in your code 
+  function setData(name, data={}) {
+    if(address === "") {
+      showToast("Please connect your wallet first", "error");
+      return;
+    }
+    XianWalletUtils.sendTransaction(
+      contract,
+      "set_data",
+      {
+        "name": name,
+        "data": data
+      }
+    ).then(result => {
+      if (result.errors) {
+        showToast('Set Data Transaction failed', 'error');
+      } else {
+        showToast('Set Data Transaction successful', 'success');
+        // Re-load result box to see updated records
+        toggleRecordsEdit(false);
+        showResultBox();
+      }
+    }).catch(error => {
+      console.error(error);
+    });
   }
   
 

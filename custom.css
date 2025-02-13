@@ -512,9 +512,13 @@ background-color: rgba(30, 30, 47, 0.7); /* or whatever you prefer */
 .custom-table td:first-child {
   border-left:none;
 }
-.custom-table td:nth-child(2) {
+.custom-table td:last-child {
   border-right:none;
 }
 .custom-table tr:last-child td {
   border-bottom:none;
+}
+#recordsActions {
+  display: flex;
+  
 }
