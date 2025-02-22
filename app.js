@@ -476,6 +476,7 @@ function changeAddress(name) {
         } else {
             showToast('Change Address Transaction successful', 'success');
             showResultBox();
+            showOwnedNames(address);
             document.querySelector("#change-address").innerHTML = 'Change to My Address';
         }
     }).catch(error => {
