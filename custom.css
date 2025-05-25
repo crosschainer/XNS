@@ -90,10 +90,32 @@ h1 {
 .text-muted {
     color: rgba(255, 255, 255, 0.7) !important;
 }
+/* === colourful – but brand-friendly – navbar link === */
+#marketplaceLink{
+  /* 4-stop gradient that echoes your accent colour (#ff4b9b)
+     and the bluish highlights already in use. */
+  background: linear-gradient(90deg,
+              #ff4b9b 0%,       /* brand pink      */
+              #ff8a5c 33%,      /* soft coral      */
+              #ffd257 66%,      /* warm yellow     */
+              #66d4ff 100%);    /* xian blue highlight */
+  background-size: 200% 100%;    /* for hover slide */
 
-.navbar-toggler-icon {
-    filter: invert(1) brightness(200%);
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+  font-weight: 600;              /* make it stand out a bit */
+  transition: background-position .6s ease;
 }
+
+/* gentle slide on hover / focus */
+#marketplaceLink:hover,
+#marketplaceLink:focus{
+  background-position: 100% 0;
+  filter: brightness(1.2);
+  text-decoration: none;         /* avoid the default underline flash */
+}
+
 
 .modal .form-control::placeholder {
     color: rgba(255, 255, 255, 0.5);
@@ -231,7 +253,9 @@ background-color: rgba(30, 30, 47, 0.7); /* or whatever you prefer */
   font-weight: 600;
   font-size: .875rem;
 }
-
+.nav-item > a{
+  color:white;
+}
 /* optional – soften the body zebra stripes a bit more */
 #mpTable tbody tr:nth-child(odd)  { background: rgba(255,255,255,.04); }
 #mpTable tbody tr:nth-child(even) { background: rgba(255,255,255,.02); }
