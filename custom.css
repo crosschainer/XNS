@@ -56,12 +56,13 @@ a {
     color: rgba(255, 255, 255, 0.5);
 }
 
-#newOwnerInput {
+#newOwnerInput, #saleAmountInput {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
   }
-#newOwnerInput:focus {
+#newOwnerInput:focus, #saleAmountInput:focus {
+    
 background: rgba(255, 255, 255, 0.15);
 border-color: rgba(255, 255, 255, 0.3);
 }
@@ -184,6 +185,14 @@ background-color: rgba(30, 30, 47, 0.7); /* or whatever you prefer */
     color: #dc3545 !important;
 }
 
+.alert-info {
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 16px;
+}
+
 .badge {
     font-size: 12px;
     font-weight: 500;
@@ -200,11 +209,85 @@ background-color: rgba(30, 30, 47, 0.7); /* or whatever you prefer */
     border-radius: 0.375rem;
     color: white;
 }
+/* ███  Marketplace table  ███ */
+#mpTable {
+  font-family: 'Montserrat', sans-serif;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* header row gets the striping gradient */
+.table-gradient{
+  background: linear-gradient(90deg,#1d2638 0%, #0f1622 100%);
+}
+
+/* make the individual header cells transparent so the row
+   gradient is visible, remove their borders */
+.table-gradient th{
+  background: transparent !important;
+  border: none;
+  text-transform: uppercase;
+  letter-spacing: .05rem;
+  font-weight: 600;
+  font-size: .875rem;
+}
+
+/* optional – soften the body zebra stripes a bit more */
+#mpTable tbody tr:nth-child(odd)  { background: rgba(255,255,255,.04); }
+#mpTable tbody tr:nth-child(even) { background: rgba(255,255,255,.02); }
+
+#mpTable tbody tr {
+  transition: background .15s ease;
+}
+
+#mpTable tbody tr:nth-child(odd)   { background: rgba(255,255,255,.03); }
+#mpTable tbody tr:nth-child(even)  { background: rgba(255,255,255,.015); }
+
+#mpTable tbody tr:hover {
+  background: rgba(255,255,255,.07);
+}
+
+#mpTable td, #mpTable th {
+  padding: .75rem 1rem;
+  border: none;
+}
+
+#mpTable a.link-light {
+  color: #d4d9ff;
+}
+#mpTable a.link-light:hover {
+  color: #ff4faf;
+  text-decoration: none;
+}
+
+/* paging buttons */
+#mpPrev.btn, #mpNext.btn {
+  min-width: 64px;
+  font-weight: 600;
+  border: none;
+  background: #ff4faf;
+}
+#mpPrev.btn:disabled, #mpNext.btn:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
 
 .badge-danger {
     border: 1px #dc3545 solid;
     /* transparent bg color */
     background-color: rgba(220, 53, 69, 0.5);
+    border-radius: 0.375rem;
+    color: white;
+}
+.marketplace-container table td,
+.marketplace-container table th{
+  vertical-align: middle;
+}
+
+.badge-warning {
+    border: 1px #ffc107 solid;
+    /* transparent bg color */
+    background-color: rgba(255, 193, 7, 0.5);
     border-radius: 0.375rem;
     color: white;
 }

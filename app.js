@@ -3,12 +3,17 @@ var chainId = "xian-network-2";
 var RPC = "https://node.xian.org";
 var EXPLORER = "https://explorer.xian.org";
 var contract = "con_name_service_final";
+var marketplace = "con_xns_marketplace";
 var registrationFee = 100;
 const connectWalletButton = document.getElementById("connectWallet");
 const addressSpan = document.getElementById("walletAddress");
 const ownedNamesContainer = document.getElementById("ownedNamesContainer");
 const nameCloud = document.getElementById("nameCloud");
 const sendError = document.getElementById("sendError");
+/* ---------- sell modal helpers ---------- */
+const sellModalEl = document.getElementById("sellModal");
+const sellModal   = new bootstrap.Modal(sellModalEl);
+let currentSellName = null;          // name we’re about to list
 let typedInstance = null;
 let mainName = null;
 let records = [];
@@ -42,225 +47,270 @@ function fromHexString(hexString) {
     return new Uint8Array(hexString.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
 }
 
-function showResultBox() {
-    let searchInput = document.getElementById("searchInput").value.trim();
-    if (searchInput === "") return;
+async function showResultBox() {
+  /* ───────── input & validation ───────── */
+  let name = document.getElementById("searchInput").value.trim();
+  if (!name) return;
 
-    // Input needs to be ASCII, ALNUM
-    if (!/^[a-zA-Z0-9]+$/.test(searchInput)) {
-        showToast("Invalid input. Only ASCII and numbers are allowed.", "error");
-        return;
-    }
-    // Input needs to be 3-32 characters long
-    if (searchInput.length < 3 || searchInput.length > 32) {
-        showToast("Invalid input. Name must be between 3 and 32 characters long.", "error");
-        return;
-    }
+  if (!/^[a-zA-Z0-9]{3,32}$/.test(name)) {
+    showToast("Name must be 3-32 ASCII letters or digits.", "error");
+    return;
+  }
+  name = name.toLowerCase();
+  currentSearchedName = name;
 
-    searchInput = searchInput.toLowerCase();
-    currentSearchedName = searchInput; // <--- ADDED
+  /* update URL */
+  const p = new URLSearchParams(location.search);
+  p.set("name", name);
+  history.replaceState({}, "", `?${p.toString()}`);
 
-     // Update ?name= in the URL (without reloading the page)
-    const params = new URLSearchParams(window.location.search);
-    params.set("name", searchInput);
-    window.history.replaceState({}, "", `?${params.toString()}`);
+  /* UI → loading */
+  const rBox = document.getElementById("resultBox");
+  rBox.style.opacity = 0;
+  rBox.style.transform = "scale(.95)";
+  rBox.style.visibility = "hidden";
+  document.getElementById("searchButton").innerHTML =
+    '<div class="spinner-border spinner-border-sm" role="status"></div>';
 
-    const resultBox = document.getElementById("resultBox");
+  /* ───────── chain look-ups ───────── */
+  const [ownRaw, expRaw, mainRaw, listRaw] = await Promise.all([
+    execute_get_owner(name),
+    execute_get_expiry_time(name),
+    execute_get_main_name_to_address(name),
+    execute_get_listing(name)
+  ]);
 
-    // Temporarily hide the content for a smoother transition
-    resultBox.style.opacity = "0";
-    resultBox.style.transform = "scale(0.95)";
-    resultBox.style.visibility = "hidden"; // Hide it first
+  const owner = JSON.parse(ownRaw).result?.replaceAll("'", "") || "None";
+  const listing = listRaw;                // null | {seller,price}
+  const isListed = !!listing;
+  const isSeller = isListed && listing.seller === address;
+  const isOwner  = owner !== "None" && owner === address;
 
-    // Replace Search Icon with Spinner to indicate loading
-    document.getElementById("searchButton").innerHTML  = '<div class="spinner-border spinner-border-sm" role="status"></div>';
+  const expStr = JSON.parse(expRaw).result || null;
+  const daysLeft = expStr
+    ? Math.max(0, Math.ceil((new Date(expStr) - new Date()) / 864e5))
+    : 0;
 
-    // Fetch owner and expiry time
-    let promises = Promise.all([execute_get_owner(searchInput), execute_get_expiry_time(searchInput), execute_get_main_name_to_address(searchInput)]);
+  const mainAddr = JSON.parse(mainRaw).result?.replaceAll("'", "") || "None";
 
-    promises.then(([owner, expiryTime, mainNameToAddress]) => {
-        owner = JSON.parse(owner).result;
-        if (owner != "None") {
-            owner = owner.replaceAll("'", "");
-        }
-        let shortenedOwner = owner.slice(0, 6) + "..." + owner.slice(-4);
-        shortenedOwner = shortenedOwner === "None" ? "Unset" : shortenedOwner.replaceAll("'", "");
-        expiryTime = JSON.parse(expiryTime).result;
-        // Convert expiry time (2026-01-31 12:28:20) to days
-        let expiryDate = new Date(expiryTime);
-        let currentDate = new Date();
-        let timeDifference = expiryDate.getTime() - currentDate.getTime();
-        let daysDifference = timeDifference / (1000 * 3600 * 24);
-        expiryTime = Math.ceil(daysDifference);
-        mainNameToAddress = JSON.parse(mainNameToAddress).result;
-        let shortenedMainNameToAddress = "";
-        if (mainNameToAddress !== "None") {
-            shortenedMainNameToAddress = mainNameToAddress.slice(0, 6) + "..." + mainNameToAddress.slice(-4);
-            shortenedMainNameToAddress = shortenedMainNameToAddress === "None" ? "Unset" : shortenedMainNameToAddress.replaceAll("'", "");
-        }
-        else {
-            shortenedMainNameToAddress = "Unset";
-        }
+  /* helpers */
+  const short = (v) =>
+    v && v !== "None" ? `${v.slice(0, 6)}...${v.slice(-4)}` : "Unset";
 
-        setTimeout(() => {
-            if (owner !== "None") {
-              isNameOwner = (address === owner); // <--- ADDED
-                resultBox.innerHTML = `
-                <div class="d-flex flex-column align-items-stretch gap-3">
-                    <div class="d-flex align-items-start gap-2">
-                        <span class="font-weight-bold">${searchInput.toLowerCase()}</span>
-                        <div class="badge badge-danger">is owned!</div>
-                    </div>
-                    <div class="mb-0">
-                        <div class="features">
-                            <span class="feature-item">XNS Powered Name <i class="bi bi-question-circle ms-1"
-     data-bs-toggle="popover"
-     data-bs-trigger="hover focus"
-     data-bs-html="true"
-     data-bs-title="What is XNS Powered Name?"
-     data-bs-content="
-       - Can be used as a receiver in the Xian Wallet to solve the issue of accidentally sending to the wrong address.<br />
-       - In the blockchain explorer, the address behind the name will appear as the name.<br />
-       - The address behind the name can be found by their name on the explorer.<br />
-       And more to come...
-     ">
-  </i></span>
-                            <span class="feature-item">NFT ownership</span>
-                        </div>
-                    
-                        <div class="d-flex gap-2 justify-content-between flex-column flex-md-row">
-                            <div class="d-flex flex-column gap-1 flex-1">
-                                <span class="text-muted">NFT Owner:</span>
-                                <span class="font-weight-bold"><a href="${EXPLORER}/addresses/${owner}" target="_blank">${shortenedOwner}</a></span>
-                                <button class="btn btn-success ${address === owner ? '': 'btn-disabled'}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${address === owner ? '' : 'You are not the owner of this name'}" id="transfer-now">Transfer Ownership</button>
-                            </div>
-                            <div class="d-flex flex-column gap-1 flex-1">
-                                <span class="text-muted">Expires in:</span>
-                                <span class="font-weight-bold">${expiryTime} days</span>
-                                <button class="btn btn-success ${address === owner ? '': 'btn-disabled'}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${address === owner ? '' : 'You are not the owner of this name'}" id="renew-now">Add 365 Days (` + registrationFee + ` XIAN)</button>
-                            </div>
-                            <div class="d-flex flex-column gap-1 flex-1">
-                                <span class="text-muted">Address behind name:</span>
-                                <span class="font-weight-bold"><a href="${EXPLORER}/addresses/${mainNameToAddress}" target="_blank">${shortenedMainNameToAddress}</a></span>
-                                <button class="btn btn-success ${address === owner ? '': 'btn-disabled'}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${address === owner ? '' : 'You are not the owner of this name'}" id="change-address">Change to My Address</button>
-                               
-                            </div>
-                        </div>
-                         ${mainNameToAddress != 'None' ? '<a href="https://'+searchInput.toLowerCase()+'.xns.domains" style=" word-wrap: break-word; overflow: hidden; margin-top:20px; display:inline-block; text-decoration: underline;width:100%;" target="_blank">' + searchInput.toLowerCase() + '.xns.domains</a> <i class="bi bi-question-circle ms-1" style=" display: inline-block; vertical-align: super; " data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-html="true" data-bs-title="What is this URL?" data-bs-content="This URL provides a direct link to the explorer page of the address behind the name."> </i>' : ''}
-                         <div id="recordsSection" class="records-section ${mainNameToAddress != 'None' ? '': 'mt-5'}">
-                         <h5 class="text-white" style="
-                                text-align: left;
-                            ">Stored Data</h5>
-                            <div id="recordsActions" class="mb-2">
-    <!-- We will show/hide these programmatically depending on ownership and edit mode -->
-    <button id="editRecordsBtn" class="btn btn-success me-2 d-none">Edit Data</button>
-    <button id="addRecordBtn" class="btn btn-success me-2 d-none">Add Record</button>
-    <button id="saveRecordsBtn" class="btn btn-success me-2 d-none">Save</button>
-    <button id="cancelEditBtn" class="btn btn-success d-none">Cancel</button>
-  </div>
-                         <div class="border-radius-8">
-                         <table class="table table-dark table-striped custom-table">
-                           <thead>
-                             <tr>
-                               <th scope="col">Key</th>
-                               <th scope="col">Value</th>
+ /* ─────────── build HTML ─────────── */
+let html = `
+  <div class="d-flex align-items-start gap-2 mb-3">
+    <span class="font-weight-bold">${name}</span>
+    <div class="badge ${owner === "None" ? "badge-success" : "badge-danger"}">
+      ${owner === "None" ? "is available!" : "is owned!"}
+    </div>
+    ${isListed ? '<div class="badge badge-warning">listed</div>' : ""}
+  </div>`;
 
-                               ${address === owner ? '<th scope="col">Actions</th>' : ''}
-                             </tr>
-                           </thead>
-                           <tbody id="recordsTableBody">
-                             <!-- Record rows will be dynamically injected here -->
-                           </tbody>
-                         </table>
-                         </div>
-                       </div>
-                    </div>
-                </div>
-                `;
-                if(document.querySelector("#renew-now") && address === owner) {
-                    document.querySelector("#renew-now").addEventListener("click", () => renewName(searchInput));
-                }
-                if(document.querySelector("#change-address") && address === owner) {
-                    document.querySelector("#change-address").addEventListener("click", () => changeAddress(searchInput));
-                }
-                if (document.querySelector("#transfer-now") && address === owner) {
-                    document.querySelector("#transfer-now").addEventListener("click", () => {
-                      openTransferOwnershipModal(searchInput);
-                    });
-                  }
-
-                // Load on-chain records for this name.
-                loadOnChainRecords();
-                
-                  
-            } else if (owner == "None") {
-              isNameOwner = false; // <--- ADDED
-                resultBox.innerHTML = `
-                <div class="d-flex flex-column align-items-stretch gap-3">
-                    <div class="d-flex align-items-start gap-2">
-                        <span class="font-weight-bold">${searchInput.toLowerCase()}</span>
-                        <div class="badge badge-success">is available!</div>
-                    </div>
-                    <div class="mb-0">
-                        <div class="features">
-                            <span class="feature-item">XNS Powered Name <i class="bi bi-question-circle ms-1"
-     data-bs-toggle="popover"
-     data-bs-trigger="hover focus"
-     data-bs-html="true"
-     data-bs-title="What is XNS Powered Name?"
-     data-bs-content="
-       - Can be used as a receiver in the Xian Wallet to solve the issue of accidentally sending to the wrong address.<br />
-       - In the blockchain explorer, the address behind the name will appear as the name.<br />
-       - The address behind the name can be found by their name on the explorer.<br />
-       And more to come...
-     ">
-  </i></span>
-                            <span class="feature-item">NFT ownership</span>
-                        </div>
-                        <p class="mb-0 text-muted">You can mint this name for ${registrationFee} XIAN. It expires after 1 year, and needs to be renewed before or it will be available for others to mint.</p>
-                    </div>
-                    <div>
-                        <button class="btn btn-success" id="mint-name">Mint Name</button>
-                    </div>
-                </div>
-                `;
-
-                document.querySelector("#mint-name").addEventListener("click", () => mintName(searchInput));
-
-            }
-            
-            // Apply smooth appearance
-            requestAnimationFrame(() => {
-                resultBox.style.visibility = "visible"; // Make it visible
-                resultBox.style.opacity = "1";
-                resultBox.style.transform = "scale(1)";
-            });
-            
-            // Reset Search Icon
-            document.getElementById("searchButton").innerHTML = '<i class="bi bi-search"></i>';
-
-            const popoverTriggerList = [].slice.call(
-                document.querySelectorAll('[data-bs-toggle="popover"]')
-              );
-            
-              popoverTriggerList.forEach((popoverTriggerEl) => {
-                new bootstrap.Popover(popoverTriggerEl, {
-                  // Optionally, customize your popover options here
-                  placement: 'top', // or 'auto', 'right', etc.
-                  container: 'body', 
-                });
-              });
-
-               // Initialize tooltips
-  const tooltipTriggerList = [].slice.call(
-    document.querySelectorAll('[data-bs-toggle="tooltip"]')
-  );
-  tooltipTriggerList.forEach((tooltipTriggerEl) => {
-    new bootstrap.Tooltip(tooltipTriggerEl);
-  });
-        }, 100);
-    });
+/* ▼▼  brand-new ‘for sale’ line ▼▼ */
+if (isListed) {
+  html += `
+    <div class="alert alert-info py-1 px-2 small w-fit-content"
+         style="background:rgba(0,123,255,.15);border:1px solid rgba(0,123,255,.25);color:#9dd1ff;">
+      This name is <b>for&nbsp;sale!</b>
+    </div>`;
 }
+
+/* ── AVAILABLE (exactly like the previous design) ──────────────── */
+if (owner === "None") {
+  html += `
+    <div class="mb-0">
+      <div class="features">
+        <span class="feature-item">XNS Powered Name
+          <i class="bi bi-question-circle ms-1" data-bs-toggle="popover"
+             data-bs-trigger="hover focus" data-bs-html="true"
+             data-bs-title="What is XNS Powered Name?"
+             data-bs-content="
+               - Can be used as a receiver in the Xian Wallet to solve the issue of accidentally sending to the wrong address.<br />
+               - In the blockchain explorer, the address behind the name will appear as the name.<br />
+               - The address behind the name can be found by their name on the explorer.<br />
+               And more to come...">
+          </i>
+        </span>
+        <span class="feature-item">NFT ownership</span>
+      </div>
+      <p class="mb-0 text-muted">
+        You can mint this name for ${registrationFee} XIAN. It expires after 1 year,
+        and needs to be renewed before or it will be available for others to mint.
+      </p>
+    </div>
+    <div>
+      <button class="btn btn-success" id="mint-name">Mint Name</button>
+    </div>
+  `;
+}
+
+/* ── OWNED (with or without listing) ───────────────────────────── */
+else {
+  /* ①  General info section (same as before) */
+  html += `
+    <div class="mb-0">
+      <div class="features">
+        <span class="feature-item">XNS Powered Name
+          <i class="bi bi-question-circle ms-1" data-bs-toggle="popover"
+             data-bs-trigger="hover focus" data-bs-html="true"
+             data-bs-title="What is XNS Powered Name?"
+             data-bs-content="- In wallet &amp; explorer the name replaces the long address.<br>And more to come…">
+          </i>
+        </span>
+        <span class="feature-item">NFT ownership</span>
+      </div>
+
+      <div class="d-flex gap-2 justify-content-between flex-column flex-md-row">
+        <!-- owner column -->
+        <div class="d-flex flex-column gap-1 flex-1">
+          <span class="text-muted">NFT Owner:</span>
+          <span class="font-weight-bold">
+            <a href="${EXPLORER}/addresses/${owner}" target="_blank">${short(owner)}</a>
+          </span>
+          <button class="btn btn-success ${isOwner ? "" : "btn-disabled"}"
+                  id="transfer-now"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="top"
+                  data-bs-title="${isOwner ? "" : "You are not the owner"}">
+            Transfer Ownership
+          </button>
+        </div>
+
+        <!-- expiry column -->
+        <div class="d-flex flex-column gap-1 flex-1">
+          <span class="text-muted">Expires in:</span>
+          <span class="font-weight-bold">${daysLeft} days</span>
+          <button class="btn btn-success ${isOwner ? "" : "btn-disabled"}"
+                  id="renew-now"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="top"
+                  data-bs-title="${isOwner ? "" : "You are not the owner"}">
+            Add 365 Days (${registrationFee}&nbsp;XIAN)
+          </button>
+        </div>
+
+        <!-- main-address column -->
+        <div class="d-flex flex-column gap-1 flex-1">
+          <span class="text-muted">Address behind name:</span>
+          <span class="font-weight-bold">
+            <a href="${EXPLORER}/addresses/${mainAddr}" target="_blank">${short(mainAddr)}</a>
+          </span>
+          <button class="btn btn-success ${isOwner ? "" : "btn-disabled"}"
+                  id="change-address"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="top"
+                  data-bs-title="${isOwner ? "" : "You are not the owner"}">
+            Change to My Address
+          </button>
+        </div>
+      </div>`;
+
+  if (mainAddr !== "None") {
+    html += `
+      <a href="https://${name}.xns.domains"
+         class="d-inline-block mt-2 text-decoration-underline"
+         target="_blank">${name}.xns.domains</a>
+      <i class="bi bi-question-circle ms-1" data-bs-toggle="popover"
+         data-bs-trigger="hover focus" data-bs-html="true"
+         data-bs-title="What is this URL?"
+         data-bs-content="Opens the explorer page of the address behind the name."></i>`;
+  }
+
+  /* ②  Market-Actions section (new unified look) */
+  if (isListed || isOwner) {
+    html += `
+  <div class="p-3 mt-3 rounded-3"
+       style="background:rgba(255,255,255,0.05);
+              border:1px solid rgba(255,255,255,0.15);">
+    <div class="d-flex w-100 flex-column align-items-start mb-3">
+      <h5 class="text-white">Market&nbsp;Actions</h5>
+      ${isListed ? `<span class="text-muted">Price:&nbsp;<b>${listing.price}&nbsp;XIAN</b></span>` : ""}
+    </div>
+    <div class="d-flex flex-wrap gap-2">`;
+
+    /* owner can create a listing */
+    if (!isListed && isOwner) {
+      html += `<button class="btn btn-warning" id="sell-now">Sell / List</button>`;
+    }
+
+    /* seller can cancel */
+    if (isListed && isSeller) {
+      html += `<button class="btn btn-warning" id="cancel-listing">Cancel Listing</button>`;
+    }
+
+    /* buyer button */
+    if (isListed && !isSeller) {
+      html += `<button class="btn btn-success" id="buy-now">Buy Now</button>`;
+    }
+
+    html += `</div></div>    <!-- end market card -->`;   /* end flex-wrap */
+  } /* end market-actions */
+}   /* end owned */
+
+html += `</div>`;        /* end root flex wrapper */
+
+
+  /* inject & fade in */
+  rBox.innerHTML = html;
+  requestAnimationFrame(() => {
+    rBox.style.visibility = "visible";
+    rBox.style.opacity = 1;
+    rBox.style.transform = "scale(1)";
+  });
+  document.getElementById("searchButton").innerHTML = '<i class="bi bi-search"></i>';
+
+  /* ───── button handlers ───── */
+
+  /* mint */
+  document.getElementById("mint-name")?.addEventListener("click", () => mintName(name));
+
+  /* owner tools */
+  if (isOwner) {
+    document.getElementById("renew-now")?.addEventListener("click", () => renewName(name));
+    document.getElementById("change-address")?.addEventListener("click", () => changeAddress(name));
+    document.getElementById("transfer-now")?.addEventListener("click", () => openTransferOwnershipModal(name));
+  }
+
+  /* selling */
+  document.getElementById("sell-now")?.addEventListener("click", () => {
+    /* reset & open modal */
+    currentSellName = name;                   // the variable `name` inside showResultBox
+    document.getElementById("saleAmountInput").value = "";
+    document.getElementById("saleError").style.display = "none";
+    sellModal.show();
+  });
+
+  /* cancel listing */
+  document.getElementById("cancel-listing")?.addEventListener("click", async () => {
+    try {
+      await XianWalletUtils.sendTransaction(marketplace, "cancel_listing", { name });
+      showResultBox();
+    } catch { showToast("Cancel failed", "error"); }
+  });
+
+  /* buy */
+  document.getElementById("buy-now")?.addEventListener("click", async () => {
+    try {
+      if (address === "") {
+        showToast("Please connect your wallet first", "error");
+        return;
+      }
+      await XianWalletUtils.sendTransaction("currency", "approve", { to: marketplace, amount: listing.price });
+      await XianWalletUtils.sendTransaction(marketplace, "buy_name", { name });
+      showOwnedNames(address);
+      showResultBox();
+    } catch { showToast("Buy failed", "error"); }
+  });
+
+  /* records */
+  if (owner !== "None") loadOnChainRecords();
+
+  /* bootstrap popovers & tooltips */
+  document.querySelectorAll('[data-bs-toggle="popover"]').forEach(el => new bootstrap.Popover(el));
+  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
+}
+
 
 function showToast(message, type = "success") {
     const toastContainer = document.getElementById("toastContainer");
@@ -303,6 +353,38 @@ function openTransferOwnershipModal(name) {
     });
   }
   
+async function execute_get_listing(name){
+
+  const priceKey  = `${marketplace}.listing_price:${name}`;
+  const sellerKey = `${marketplace}.listing_seller:${name}`;
+
+  const query = `
+    query ($priceKey:String!,$sellerKey:String!){
+      price:  allStates(filter:{key:{equalTo:$priceKey }}){edges{node{value updated}}}
+      seller: allStates(filter:{key:{equalTo:$sellerKey}}){edges{node{value}}}
+    }`;
+
+  const data = await graphqlFetch(query, { priceKey, sellerKey });
+
+  const priceEdge  = data.price.edges[0];
+  const sellerEdge = data.seller.edges[0];
+
+  try {
+
+  if (!priceEdge || !sellerEdge) return null;   // not listed
+
+  return {
+    price  : parseInt(priceEdge.node.value, 10),
+    seller : sellerEdge.node.value,
+    updated: new Date(priceEdge.node.updated)
+  };
+  } catch (error) {
+    console.error("Error parsing listing data:", error);
+    return null; // Return null if there's an error
+  }
+}
+
+
 
 async function execute_get_owner(name) {
     let payload = {
@@ -692,6 +774,165 @@ async function showOwnedNames(userAddress) {
     return names;
   }
 
+  /* ╔══════════════════════════════════════════════════════════╗
+   ║           M A R K E T P L A C E   V I E W                ║
+   ╚══════════════════════════════════════════════════════════╝ */
+   
+
+const MP_PAGE_SIZE = 25;
+let   mpPage       = 1;
+let   mpTotalPages = 1;
+
+/* ░░ fetch one page, newest → oldest ░░ */
+async function fetchMarketplacePage(page = 1) {
+  const first  = MP_PAGE_SIZE;
+  const offset = (page - 1) * MP_PAGE_SIZE;
+
+  /* two prefixes: one for price, one for seller */
+  const pricePref  = marketplace + ".listing_price:";
+  const sellerPref = marketplace + ".listing_seller:";
+
+  /* GraphQL: newest → oldest by `updated` timestamp              */
+  /* we page only the price keys, then look up matching sellers   */
+  const query = `
+    query ($pricePref:String!, $sellerPref:String!,
+           $first:Int!, $offset:Int!) {
+
+      prices: allStates(
+        first:  $first,
+        offset: $offset,
+        filter:{
+  and:[
+    { key:          { startsWith: $pricePref } },
+    { value:        { isNull: false } },
+    { valueNumeric: { greaterThan: "0" } }
+  ]
+},
+        orderBy: UPDATED_DESC
+      ) {
+        totalCount
+        edges { node { key value updated } }
+      }
+
+      sellers: allStates(
+        filter: { key:{ startsWith:$sellerPref } }
+      ) {
+        edges { node { key value } }
+      }
+    }
+  `;
+
+  const vars = { pricePref, sellerPref, first, offset };
+  const data = await graphqlFetch(query, vars);
+
+  /* total pages for the pager controls */
+  mpTotalPages = Math.max(
+    1,
+    Math.ceil(data.prices.totalCount / MP_PAGE_SIZE)
+  );
+
+  /* build  name → seller  map from seller edges */
+  const sellerMap = {};
+  data.sellers.edges.forEach(e => {
+    const name = e.node.key.split(":")[1];   // after prefix
+    sellerMap[name] = e.node.value;
+  });
+
+  /* convert price edges to rows the renderer understands */
+  return data.prices.edges.map(e => {
+    const name = e.node.key.split(":")[1];
+    return {
+      name,
+      price : parseInt(e.node.value, 10),
+      seller: sellerMap[name] || "—",
+      time  : +new Date(e.node.updated)       // ms epoch
+    };
+  });
+}
+
+/* ░░ human “x min ago” helper ░░ */
+const ago = (t) => {
+  const s  = Math.floor((Date.now() - t) / 1000);
+  if (s < 60)            return `${s}s`;
+  if (s < 3600)          return `${Math.floor(s/60)}m`;
+  if (s < 86400)         return `${Math.floor(s/3600)}h`;
+  return `${Math.floor(s/86400)}d`;
+};
+
+/* ░░ render function ░░ */
+/* ░░ render function ░░ */
+async function renderMarketplace(page = 1) {
+
+  const wrap   = document.getElementById("marketplaceContainer");
+  const body   = document.querySelector("#mpTable tbody");
+  const info   = document.getElementById("mpPageInfo");
+  const prevB  = document.getElementById("mpPrev");
+  const nextB  = document.getElementById("mpNext");
+
+  wrap.classList.remove("d-none");
+  body.innerHTML = `
+    <tr><td colspan="5" class="text-center">
+      <div class="spinner-border spinner-border-sm"></div>
+    </td></tr>`;
+
+  const rows = await fetchMarketplacePage(page);
+  body.innerHTML = "";   // clear spinner
+
+  if (rows.length === 0) {
+    body.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Nothing listed right now.</td></tr>';
+  } else {
+    rows.forEach(r => {
+
+      const tr  = document.createElement("tr");
+
+      /* name cell (clickable) */
+      const nameCell = `<a href="#" class="link-light text-decoration-underline fw-semibold mp-name">${r.name}</a>`;
+      /* seller shortened */
+      const seller = `${r.seller.slice(0,6)}...${r.seller.slice(-4)}`;
+
+      tr.innerHTML = `
+        <td>${nameCell}</td>
+        <td>${r.price}</td>
+        <td><a href="${EXPLORER}/addresses/${r.seller}" target="_blank">${seller}</a></td>
+        <td>${ago(r.time)} ago</td>
+        
+      `;
+
+      /* ——— events ——— */
+      tr.querySelector(".mp-name").onclick = async (e) => {
+        e.preventDefault();
+
+        /* switch back to the main view (no full refresh) */
+        document.getElementById("marketplaceContainer").classList.add("d-none");
+        document.getElementById("mainContent").classList.remove("d-none");
+        history.replaceState({}, "", `?name=${r.name}`);   // nice clean URL
+
+        /* show the name details */
+        stopTypedPlaceholder();
+        document.getElementById("searchInput").value = r.name;
+        await showResultBox();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      };
+
+     
+      body.appendChild(tr);
+    });
+  }
+
+  /* paging controls */
+  mpPage = page;
+  info.textContent = `${mpPage} / ${mpTotalPages}`;
+  prevB.disabled = mpPage === 1;
+  nextB.disabled = mpPage === mpTotalPages;
+}
+
+
+/* prev / next buttons wiring */
+document.getElementById("mpPrev").onclick = () => renderMarketplace(mpPage-1);
+document.getElementById("mpNext").onclick = () => renderMarketplace(mpPage+1);
+
+
+
 function connectWallet() {
     // We show a loading spinner while the wallet is being connected
     document.querySelector("#connectWallet").innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div>';
@@ -949,6 +1190,49 @@ function renderRecords(records) {
       console.error("Error loading on-chain records:", error);
     }
   }
+
+  document.getElementById("confirmSaleButton").addEventListener("click", async () => {
+  /* UI */
+  const btn     = document.getElementById("confirmSaleButton");
+  const errBox  = document.getElementById("saleError");
+  const amount  = parseInt(document.getElementById("saleAmountInput").value.trim(), 10);
+
+  errBox.style.display = "none";
+
+  if (isNaN(amount) || amount <= 0) {
+    errBox.textContent = "Enter a valid positive amount (whole XIAN).";
+    errBox.style.display = "block";
+    return;
+  }
+
+  /* spinner */
+  btn.innerHTML = '<div class="spinner-border spinner-border-sm"></div>';
+  btn.disabled  = true;
+
+  try {
+    /* 1️⃣  approve marketplace inside the name-service so escrow_in works */
+    await XianWalletUtils.sendTransaction(
+      contract,                 // con_name_service(_final)
+      "approve",
+      { name: currentSellName, to: marketplace }
+    );
+
+    /* 2️⃣  list the name */
+    await XianWalletUtils.sendTransaction(
+      marketplace, "list_name",
+      { name: currentSellName, price: amount }
+    );
+
+    sellModal.hide();
+    showResultBox();            // refresh UI
+  } catch (e) {
+    errBox.textContent = "Listing failed. Check wallet.";
+    errBox.style.display = "block";
+  } finally {
+    btn.innerHTML = "Confirm Sale";
+    btn.disabled  = false;
+  }
+});
   
   // Toggles the entire table into/out-of edit mode
   function toggleRecordsEdit(enableEdit) {
@@ -1091,6 +1375,8 @@ document.getElementById("searchInput").addEventListener("keypress", function (ev
 });
 document.getElementById('newOwnerInput').addEventListener('input', getXNSAddress);
 
+
+
 document.addEventListener("DOMContentLoaded", () => {
     // Check the URL for ?name=someName
     const params = new URLSearchParams(window.location.search);
@@ -1100,6 +1386,16 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("searchInput").value = nameFromUrl.trim();
       // Immediately show result box for that name
       showResultBox();
+    }
+
+    // if #market is in the URL, show the marketplace view
+    if (window.location.hash === "#market") {
+        document.getElementById("marketplaceContainer").classList.remove("d-none");
+        document.getElementById("mainContent").classList.add("d-none");
+        renderMarketplace(1); // Load first page
+    } else {
+        document.getElementById("marketplaceContainer").classList.add("d-none");
+        document.getElementById("mainContent").classList.remove("d-none");
     }
 
     // Start rotating placeholder if there's no name loaded
