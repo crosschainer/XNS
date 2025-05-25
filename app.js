@@ -139,7 +139,7 @@ if (owner === "None") {
         and needs to be renewed before or it will be available for others to mint.
       </p>
     </div>
-    <div>
+    <div class="mt-3">
       <button class="btn btn-success" id="mint-name">Mint Name</button>
     </div>
   `;
