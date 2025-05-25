@@ -841,22 +841,27 @@ async function fetchMarketplacePage(page = 1) {
   /* convert price edges to rows the renderer understands */
   return data.prices.edges.map(e => {
     const name = e.node.key.split(":")[1];
+    const ts   = Date.parse(e.node.updated + 'Z');   // milliseconds
     return {
       name,
       price : parseInt(e.node.value, 10),
       seller: sellerMap[name] || "—",
-      time  : +new Date(e.node.updated)       // ms epoch
+      time  : ts,   // UTC milliseconds
     };
   });
 }
-
-/* ░░ human “x min ago” helper ░░ */
-const ago = (t) => {
-  const s  = Math.floor((Date.now() - t) / 1000);
-  if (s < 60)            return `${s}s`;
-  if (s < 3600)          return `${Math.floor(s/60)}m`;
-  if (s < 86400)         return `${Math.floor(s/3600)}h`;
-  return `${Math.floor(s/86400)}d`;
+const listedAt = (utcMillis) => {
+  return new Date(utcMillis).toLocaleString(
+    undefined,                    // let the browser pick the current locale
+    {
+      year:   'numeric',          // 2025 May 25, 14:07  –-or-–  25 May 2025, 14:07
+      month:  'short',
+      day:    '2-digit',
+      hour:   '2-digit',
+      minute: '2-digit',
+      hour12: false               // 24 h clock; drop this line if you prefer AM/PM
+    }
+  );
 };
 
 /* ░░ render function ░░ */
@@ -894,7 +899,7 @@ async function renderMarketplace(page = 1) {
         <td>${nameCell}</td>
         <td>${r.price}</td>
         <td><a href="${EXPLORER}/addresses/${r.seller}" target="_blank">${seller}</a></td>
-        <td>${ago(r.time)} ago</td>
+        <td>${listedAt(r.time)}</td>
         
       `;
 
